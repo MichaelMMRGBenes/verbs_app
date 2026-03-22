@@ -10,7 +10,7 @@ WORDS = [
     "koira", "kissa", "hevonen", "lehmä", "lammas", "sika", "karhu", "susi", "kettu", "jänis",
     "lintu", "kala", "käärme", "hyönteinen", "puu", "kukka", "metsä", "järvi", "meri", "joki",
     "vuori", "mäki", "saari", "niemi", "ranta", "taivas", "aurinko", "kuu", "tähti", "pilvi",
-    "sade", "lumi", "jää", "tuuli", "ukkonen", "salam", "kivi", "hiekka", "multa", "ruoho",
+    "sade", "lumi", "jää", "tuuli", "ukkonen", "kivi", "hiekka", "multa", "ruoho",
     "lehti", "oksa", "juuri", "marja", "sieni", "puro", "lähde", "suo", "tunturi", "luonto",
     
     # --- Lidé a rodina ---
@@ -41,7 +41,7 @@ WORDS = [
     
     # --- Doprava a město ---
     "auto", "bussi", "juna", "lentokone", "laiva", "vene", "pyörä", "moottoripyörä", "tie", "katu",
-    "polku", "silta", "tunneli", "asema", "satama", "lentokenttä", "tori", "puisto", "kaupunki", "kylä",
+    "polku", "silta", "tunneli", "asema", "satama", "lentoke", "tori", "puisto", "kaupunki", "kylä",
     "maa", "valtio", "raja", "keskusta", "kauppa", "pankki", "sairaala", "koulu", "kirkko", "tehdas",
     "hotelli", "ravintola", "kahvila", "elokuvateatteri", "museo", "kirjasto", "teatteri", "poliisi", "posti", "apteekki",
     
@@ -64,7 +64,7 @@ WORDS = [
     
     # --- Materiály a předměty ---
     "metalli", "rauta", "kulta", "hopea", "lasi", "muovi", "puu", "paperi", "kangas", "nahka",
-    "kivi", "tiili", "betoni", "roska", "jätettä", "pöly", "savu", "tuli", "liekki", "hiili",
+    "kivi", "tiili", "betoni", "roska", "jäte", "pöly", "savu", "tuli", "liekki", "hiili",
     
     # --- Další podstatná jména ---
     "kone", "laite", "työkalu", "vasara", "saha", "naula", "ruuvi", "neula", "lanka",
