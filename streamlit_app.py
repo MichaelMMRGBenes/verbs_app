@@ -18,6 +18,7 @@ def play_audio(file_path):
             """
         st.components.v1.html(md, height=0)
 # --- 0. PLACEHOLDER DATA & LOGIC (Replace with your actual logic) ---
+
 WORDS = {
     # Animals & Nature
     "koira": "dog", "kissa": "cat", "hevonen": "horse", "lehmä": "cow", "lammas": "sheep",
@@ -84,7 +85,7 @@ WORDS = {
     "päivä": "day", "viikko": "week", "kuukausi": "month", "vuosi": "year", "vuosisata": "century",
     "aamu": "morning", "ilta": "evening", "yö": "night", "maanantai": "Monday", "tiistai": "Tuesday",
     "keskiviikko": "Wednesday", "torstai": "Thursday", "perjantai": "Friday", "lauantai": "Saturday",
-    "sunnuntai": "Sunday", "kevät": "spring", "kesä": "summer", "syys": "autumn", "talvi": "winter",
+    "sunnuntai": "Sunday", "kevät": "spring", "kesä": "summer", "syksy": "autumn", "talvi": "winter",
     "asia": "thing", "sana": "word", "nimi": "name", "numero": "number", "väri": "color",
     "ääni": "sound", "valo": "light", "elämä": "life", "onni": "happiness", "rakkaus": "love",
     "työ": "work", "raha": "money", "ongelma": "problem", "vastaus": "answer", "kysymys": "question",
@@ -150,7 +151,7 @@ def partitive_sg(word:str) -> str:
     for item in exceptions:
         if item in word[-len(item):]:
             word = word[:-len(item)] + exceptions[item]
-            return word
+            return [word]
     
     #I to E, need to work on 
     for item in i_to_e:
@@ -161,6 +162,7 @@ def partitive_sg(word:str) -> str:
                     word = word[:-1] +"tä"
                 else:
                     word = word[:-1] + "ta" #tä
+                return [word]
 
             # ni -> nta/ntä
             elif word[-2:] == "ni":
@@ -168,6 +170,7 @@ def partitive_sg(word:str) -> str:
                     word = word[:-1] + "tä"
                 else:
                     word = word[:-1] +"ta" 
+                return [word]
 
             # ri -> rtä
             elif word[-2:] == "ri":
@@ -175,6 +178,7 @@ def partitive_sg(word:str) -> str:
                     word = word[:-1] +"tä"
                 else:
                     word = word[:-1] +"ta" #tä
+                return [word]
 
             # hi -> hta 
             elif word[-2:] == "hi":            
@@ -182,18 +186,21 @@ def partitive_sg(word:str) -> str:
                     word = word[:-1] +"tä"
                 else:
                     word = word[:-1] +"ta" #tä
+                return [word]
             #siili, kaali
             elif word[-4:] in ("iili", "aali"):
                 if "a" in word[-4:]:
                     word += "a"
                 else:
                     word += "ä"
+                return [word]
             # li -> ltä
             elif word[-2:] == "li":
                 if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
                     word = word[:-1] +"tä"
                 else:
                     word = word[:-1] +"ta" #tä
+                return [word]
 
             # si -> ttä
             elif word[-2:] == "si":
@@ -201,15 +208,17 @@ def partitive_sg(word:str) -> str:
                     word = word[:-2] +"ttä"
                 else:
                     word = word[:-2] +"tta" # checknout to tä
+                return [word]
 
             #i -> e + a/ä
             else:
                 if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-5:] for vowel in neutralising_vowels):
-                    word = word[:-1] +"eä"
+                    word = word[:-1] + "eä"
                 else:
-                    word = word[:-1] +"ea"
+                    word = word[:-1] + "ea"
+                return [word]
 
-            return word
+
         
 
     #nalle
@@ -218,18 +227,23 @@ def partitive_sg(word:str) -> str:
             word += "ä"
         else:
             word += "a"
+        return [word]
     #lattia -> lattiaa, miniä -> miniää, teknologia -> teknologiaa 
     elif word[-2:] == "ia":
         word += "a"
+        return [word]
 
     elif word[-2:] == "iä":
         word += "ä"
+        return [word]
 
     elif word[-2:] == "ee":
         word += "tä"
+        return [word]
 
     elif word[-2:] in ("oi","ai"):
         word += "ta"
+        return [word]
 
     #nainen -> naista
     elif word[-3:] == "nen":
@@ -237,6 +251,7 @@ def partitive_sg(word:str) -> str:
             word = word[:-3] + "stä"
         else:
             word = word[:-3] + "sta"
+        return [word]
 
     #ahven -> ahventa
     elif word[-2:] == "en" and word[-3:] != "nen":
@@ -244,28 +259,35 @@ def partitive_sg(word:str) -> str:
             word += "tä"
         else:
             word += "ta"
+        return [word]
 
 
     #RAKKAUS -> rakkautta
     elif word[-4:] in ("eus", "uus", "kaus","ous"):
         word = word[:-1] + "tta"
+        return [word]
     #All thanks to my beautiful girlfriend Maria that helped me with this program <3
     #avaruus and kauneus
     elif word[-3:] in ("eus", "uus","ous"):
         word = word[:-1] + "tta"
+        return [word]
 
     #kokemus
     elif word[-2:] == "us":
-        word += "ta" 
+        word += "ta"
+        return [word]
 
     elif word[-3:] in ("yys", "eys"):
         word = word[:-1] + "ttä"
+        return [word]
     #ymmärys -> ymmärystä
     elif word[-2:] == "ys":
         word += "tä"
+        return [word]
     #kevyt
     elif word[-2:] == "yt":
         word += "tä"
+        return [word]
     
 
     #E vene -> venettä, laite -> laitetta
@@ -273,18 +295,22 @@ def partitive_sg(word:str) -> str:
         if any(vowel in word[-6:] for vowel in changing_vowels) or any(vowel in word[-6:] for vowel in neutral_vowels) and not any(vowel in word[-6:] for vowel in neutralising_vowels):
             word += "ttä"
         else: word += "tta"
+        return [word]
 
     # Loan words
     elif word[-1] == "i" and word not in i_to_e:
         if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-6:] for vowel in neutral_vowels) and not any(vowel in word[-8:] for vowel in neutralising_vowels):
             word = word +"ä"
+            
         else:
             word = word +"a"
+        return [word]
 
     elif word in loan_words:
         if word[-1] == "i":
             word += "a"
         else: word += "ia"
+        return [word]
 
     #auto -> autoa / leipää -> leipää
     elif word[-1] in all_vowels and word[-2] not in all_vowels:
@@ -295,12 +321,14 @@ def partitive_sg(word:str) -> str:
         elif word[-1] in basic_vowels:
             word += "a"
 
+        return [word]
+
     #samea
     elif word[-2:] == "ea":
-        word += "a"
+        return [word + "a", word[:-2] + "eata"]
 
     elif word[-2:] == "eä":
-        word += "ä"
+        return [word + "ä", word[:-2] + "eätä"]
 
     #maa -> maata / yö -> yötä
     elif word[-1] in all_vowels:
@@ -308,6 +336,8 @@ def partitive_sg(word:str) -> str:
             word += "ta"
         else:
             word += "tä"
+
+        return [word]
 
     elif word[-1] not in all_vowels and word[-2] != "u":
         if any(vowel in word[-6:] for vowel in neutral_vowels) and not any(vowel in word[-6:] for vowel in neutralising_vowels):
@@ -317,6 +347,7 @@ def partitive_sg(word:str) -> str:
             word += "tä" 
         else: 
             word += "ta"
+        return [word]
 
     #tatar -> tatarta
     elif word[-1] not in all_vowels:
@@ -324,12 +355,14 @@ def partitive_sg(word:str) -> str:
             word += "ta"
         else:
             word += "tä"
+        
+        return [word]
     #A word ends in a consonant or a relic consonant, the partitive stem ends in a consonant, 
     # and the strong-grade plural stem ends in a diphthong.
 
 
 
-    return word
+    return [word]
 
 def partitive_pl(word) -> str:
 
@@ -345,7 +378,7 @@ def partitive_pl(word) -> str:
 #All thanks to my beautiful girlfriend Maria that helped me with this program <3    
     #koe, rikas, mies, puhelin
     #Leimu contribution# - näppäin <3 saippuakauppias
-    exceptions = {"hana":"hanoja", "kaappi":"kaappeja", "maailma":"maailmoja", "keskusta":"keskustoja", "sana":"sanoja","etelä":"eteliä","jänis":"jäniksiä","viikko":"viikkoja","kiuas":"kiukaita","suola":"suoloja","veli":"veljiä","ihana":"ihania","näppäin":"näppäimiä","muna":"munia","appelsiini":"appelsiineja", "voi":"voita","hidas":"hitaita", "laite":"laitteita","kausi": "kausia", "taide":"taiteita","laki":"lakeja","hotelli":"hotelleja","pullo":"pulloja","vuoro":"vuoroja","hana":"hanoja","verkko":"verkkoja","lahje":"lahkeita","kirkko":"kirkkoja","omena":"omenoita","ien":"ikeniä","koe":"kokeita", "rikas":"rikkaita", "mies":"miehiä", "puhelin":"puhelimia", "tytär":"tyttäriä", "kannel":"kanteleita", "sävel":"säveliä", "kyynel":"kyyneleitä", "sammal":"sammaleita", "taival":"taipaleita", "askel":"askeleita", "nivel":"niveliä","ommel":"ompeleita", "tanner":"tantereita", "manner":"mantereita", "seitsemän":"seitsemiä", "jääkiekko":"jääkiekkoja", "matala":"matalia","ihana":"ihania", "ahkera":"ahkeria", "sako":"sakkoja", "musiikki":"musiikkeja"}
+    exceptions = {"hana":"hanoja", "kaappi":"kaappeja", "maailma":"maailmoja", "keskusta":"keskustoja", "sana":"sanoja","etelä":"eteliä","jänis":"jäniksiä","viikko":"viikkoja","kiuas":"kiukaita","suola":"suoloja","veli":"veljiä","ihana":"ihania","näppäin":"näppäimiä","muna":"munia","appelsiini":"appelsiineja", "voi":"voita","hidas":"hitaita", "laite":"laitteita","kausi": "kausia", "taide":"taiteita","laki":"lakeja","pullo":"pulloja","vuoro":"vuoroja","hana":"hanoja","verkko":"verkkoja","lahje":"lahkeita","kirkko":"kirkkoja","omena":"omenoita","ien":"ikeniä","koe":"kokeita", "rikas":"rikkaita", "mies":"miehiä", "puhelin":"puhelimia", "tytär":"tyttäriä", "kannel":"kanteleita", "sävel":"säveliä", "kyynel":"kyyneleitä", "sammal":"sammaleita", "taival":"taipaleita", "askel":"askeleita", "nivel":"niveliä","ommel":"ompeleita", "tanner":"tantereita", "manner":"mantereita", "seitsemän":"seitsemiä", "jääkiekko":"jääkiekkoja", "matala":"matalia","ihana":"ihania", "ahkera":"ahkeria", "sako":"sakkoja", "musiikki":"musiikkeja"}
     
     i_to_e = ["alpi","uni", "appi","arki","arpi","hanhi","hanki","happi","hapsi","hauki","heisi","helmi","henki","hetki","hiili","hiiri","hiisi","hiki",
 "hirsi","hirvi","huoli","huuli","impi","joki","jouhi","jousi","juoni","juuri","jälki","jälsi","järki","järvi","Jääski","kaali","kaari","kaihi","kaikki","kaksi",
@@ -364,11 +397,11 @@ def partitive_pl(word) -> str:
     for item in exceptions:
         if len(item) > 3 and item in word[-len(item):]:
             word = word[:-len(item)] + exceptions[item]
-            return word
+            return [word]
         else:
             if item == word:
                 word = exceptions[item]
-                return word
+                return [word]
 
     for item in i_to_e:
         if len(word) > 5:
@@ -377,148 +410,183 @@ def partitive_pl(word) -> str:
                     word += "ä"
                 else:
                     word += "a"
-                return word
+                return [word]
         else:
             if item == word:
                 if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:]  for vowel in neutral_vowels) and not any(vowel in word[-4:] for vowel in neutralising_vowels):
                     word += "ä"
                 else:
                     word += "a"
-                return word
+                return [word]
     
 
         #mansikka/
     if word[-3:] in ("kka","kko") and syllables >= 3 and not any(vowel in word for vowel in changing_vowels):
-        word = word[:-2] + "oita"
+        return [word[:-2] + "oita", word[:-1] + "oja"]
+
 
     elif word[-3:] == "hai":
         word += "ta"
+        return [word]
 
 
     
     elif word[-3:] in ("yrä") and syllables == 3:
         word = word[:-1] + "öitä"
+        return [word]
 
     elif word[-3:] in ("ävä", "evä", "ärä") and syllables == 3:
         word = word[:-1] + "iä"
+        return [word]
     
     elif word[-2:] in ("lä", "rä", "nä", "iä") and syllables >= 3 and not any(vowel in word for vowel in neutralising_vowels):
-        word = word[:-1] + "öitä" 
+        word = word[:-1] + "öitä"
+        return [word]
         
     elif word[-1] == "ä" and word[-2:] != "ää":
         word = word[:-1] + "iä"
+        return [word]
         
     elif word[-4:] == "mmas":
         word = word[:-3] + "paita"
+        return [word]
     
     elif word[-3:] == "das":
         word = word[:-3] + "taita"
+        return [word]
 
     elif word[-3:] in ("kke"):
         word = word[:-1] + "eja"
+        return [word]
 
     elif word[-4:] == "aite":
         word = word[:-1] + "teita"
+        return [word]
 
         #varvas -> varpaita
     elif word[-4:] == "rvas":
         word = word[:-3] + "paita"
+        return [word]
 
     elif word[-2:] == "pas":
         word = word[:-1] + "paita"
+        return [word]
+    
         #taivas -> taivaita
     elif word[-3:] == "vas":
         word = word[:-1] + "ita"
+        return [word]
 
         #kauppias -> kauppiaita
     elif word[-3:] == "ias":
         word = word[:-1] + "ita"
+        return [word]
 
-  
 
-
-    
-
-        #mukava, matala
+    #mukava, matala
     elif word[-3:] in ("ala", "ava", "isa", "era") and syllables == 3 and word[-4:] != "aala":
         word = word[:-1] + "ia"
+        return [word]
 
 
-
-       
-        #ravintola
+    #ravintola
     elif word[-2:] in ("la", "ra", "na", "ia") and syllables >= 3 and not any(vowel in word for vowel in changing_vowels):
         word = word[:-1] + "oita"
+        return [word]
 
-        #opiskelija 
+    #opiskelija 
     elif word[-3:] == "ija" and syllables >= 3:
         word = word[:-1] + "oita"
+        return [word]
 
     elif word[-3:] == "ijä" and syllables >= 3:
         word = word[:-1] + "äitä"
+        return [word]
+    
 
-
-
-        #korkea
+    #korkea
     elif word[-2:] == "ea" and syllables >= 3:
         word = word[:-1] + "ita"
+        return [word]
+    
 
     elif word[-2:] == "eä" and syllables >= 3:
         word = word[:-1] + "itä"
+        return [word]
+    
+
         #vadelma, majava
     elif word[-2:] in ("ma", "va") and syllables >= 3:
         word = word[:-1] + "ia"
+        return [word]
 
     elif word[-2:] in ("mä", "vä")and syllables >= 3:
         word = word[:-1] + "iä"
+        return [word]
 
         #aja -> ia, opettaja
     elif word[-3:] == "aja" and syllables >= 3:
-        word = word[:-1] + "ia" 
+        word = word[:-1] + "ia"
+        return [word]
 
     elif word[-3:] == "äjä"and syllables >= 3:
-        word = word[:-1] + "iä" 
+        word = word[:-1] + "iä"
+        return [word]
 
         #kännykkä
     elif word[-3:] in ("kkä", "kkö") and syllables >= 3:
-        word = word[:-2] + "öitä"
+        return [word[:-2] + "oitä", word[:-1] + "öjä"]
+
 
         # o / u
         #and syllables == 2 
     elif word[-1] == "a" and (get_first_vowel_in_long_word(word) in ("a", "e", "i")) and word[-2:] != "aa":
         word = word[:-1] + "oja"
+        return [word]
 
         #2 syllables words with a ending
         # o / u
         #and syllables == 2 #it doesnt work for kauppa
     elif word[-1] == "a" and (get_first_vowel_in_long_word(word) in ("o", "u")) and word[-2:] != "aa":
         word = word[:-1] + "ia"
-
+        return [word]
         #kenkä, leipä
 
         #tie -> eitä
     elif word[-2:] == "ie":
         word = word[:-2] + "eitä"
+        return [word]
+
         #uo -> oita
     elif word[-2:] == "uo":
         word = word[:-2] + "oita"
+        return [word]
 
         #yö -> öitä
     elif word[-2:] == "yö":
         word = word[:-2] + "öitä"
+        return [word]
 
         #eo -> eoita
     elif word[-2:] == "eo":
         word = word[:-2] +"eoita"
+        return [word]
+    
         #io -> ioita
     elif word[-2:] == "io":
         word = word[:-2] +"ioita"
+        return [word]
+
         #iö -> iöitä
     elif word[-2:] == "iö":
         word = word[:-2] +"iöitä"
+        return [word]
+
+
         #ao -> aoita 
     elif word[-2:] == "ao":
         word = word[:-2] +"aoita"
+        return [word]
         #All thanks to my beautiful girlfriend Maria that helped me with this program <3
         #suomalainen 
 
@@ -528,19 +596,28 @@ def partitive_pl(word) -> str:
             word = word[:-3] +"siä"
         else:
             word = word[:-3] +"sia"
+        return [word]
 
         #vät
     elif word[-3:] == "vät":
         word = word[:-2] +"äitä"
+        return [word]
+    
     #nyt -> neitä
     elif word[-3:] == "nyt":
         word = word[:-2] +"eitä"
+        return [word]
+    
     #ut -> ita
     elif word[-2:] == "ut":
         word = word[:-1] +"ita"
+        return [word]
+    
     #yt -> itä
     elif word[-2:] == "yt":
         word = word[:-1] +"itä"
+        return [word]
+
     #is -> iita
     elif word[-2:] == "is":
         if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):        
@@ -548,14 +625,18 @@ def partitive_pl(word) -> str:
         else:
             word = word[:-1] +"ita"
 
+        return [word]
+
     #double vowel
     # puu, syy,  maa
     elif word[-2:] in ("uu", "ii", "aa"):
         word = word[:-1] + "ita"
+        return [word]
 
     #myy, jää
     elif word[-2:] in ("ää","yy", "ee"):
         word = word[:-1] + "itä"
+        return [word]
 
     #kuuloke     
     elif word[-2:] == "ke":
@@ -563,27 +644,32 @@ def partitive_pl(word) -> str:
             word = word[:-1] + "keitä"
         else:
             word = word[:-1] + "keita"
+        return [word]
+        
 
     elif word[-2:] == "de":
         if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):        
             word = word[:-2] + "teitä"
         else:
             word = word[:-2] + "teita"
+        return [word]
         
     elif word[-3:] == "ste":
         if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):        
-
             word += "itä"
         else:
             word += "ita"
+        return [word]
                   
 
     elif word[-2:] == "te":
         word = word[:-1] + "teita"
+        return [word]
         
     #tunne -> tunteita 
     elif word[-3:] == "nne":
         word = word[:-2] + "teita"
+        return [word]
 
     #huone, kone
     elif word[-1] == "e":
@@ -591,23 +677,28 @@ def partitive_pl(word) -> str:
             word += "itä"
         else:
             word += "ita"
+        return [word]
 
         #All thanks to my beautiful girlfriend Maria that helped me with this program <3            
         #rakkaus might need change to aus
     elif word[-2:] in ("us", "es","os"):
         word = word[:-1] + "ksia"
+        return [word]
 
     elif word[-3:] in ("has"):
         word = word[:-1] + "ksia"
+        return [word]
 
     #närästys
     elif word[-2:] == "ys":
         word = word[:-1] + "ksiä"
+        return [word]
     
     #rikas -> riKKaita
     #kaunis -> kauniita
     elif word[-3:] == "nis":
         word = word[:-1] + "ita"
+        return [word]
 
     #siemen
     elif word[-2:] == "en":
@@ -615,10 +706,12 @@ def partitive_pl(word) -> str:
             word += "iä"
         else:
             word += "ia"
+        return [word]
     #All thanks to my beautiful girlfriend Maria that helped me with this program <3
     #rasvaton -> rasvatomia
     elif word[-2:] in ("on","an"):
         word = word[:-2] + "tomia"
+        return [word]
 
     #puhelin
     elif word[-3:] in ("lin", "ain"):
@@ -626,6 +719,7 @@ def partitive_pl(word) -> str:
             word = word[:-1] + "miä"
         else:
             word = word[:-1] + "mia"
+        return [word]
 
 
     elif word[-3:] == "tin":
@@ -633,68 +727,76 @@ def partitive_pl(word) -> str:
             word = word[:-2] + "timiä"
         else: 
             word = word[:-2] + "timia"
+        return [word]
     #sydän
     elif word[-3:] == "dän":
         word = word[:-1] + "miä"  
+        return [word]
 
     #työtön -> työtömiä
     elif word[-2:] in ("ön", "än"):
         word = word[:-2] + "tömiä"
+        return [word]
+
     #matala
     elif word[-1:] == "a" and syllables == 3:
         word = word[:-1] + "ia"
+        return [word]
 
     #hämärä
     elif word[-1:] == "ä" and syllables == 3:
         word = word[:-1] + "iä"
+        return [word]
 
 
     elif word[-2:] == "li" and syllables >= 3:
         if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word[-6:] for vowel in neutralising_vowels):
-            word = word[:-1] + "ejä"
+            return [word[:-1] + "ejä", word[:-1] + "eitä"]
         else:
-            word = word[:-1] + "eja"
+            return [word[:-1] + "eja", word[:-1] + "eita"]
 
     
-
     #luettelo
     elif word[-2:] == "lo" and syllables >= 3:
-        word += "ita"
+        return [word + "ita", word + "ja"]
 
     elif word[-2:] == "la" and syllables >= 3:
         word = word[-1] + "oita"
+        return [word]
 
     #henkilö
     elif word[-2:] == "lö" and syllables >= 3:
-        word += "itä"
+        return [word + "itä", word + "jä"]
 
     #sopraano
     elif word[-2:] == "no" and syllables >= 3:
-        word += "ja"
+        return [word + "ja", word + "ita"]
 
     #kaveri
     elif word[-2:] == "ri" and syllables >= 3:
-        word = word[:-1] + "eita"
+        return [word[:-1] + "eita", word[:-1] + "eja"]
 
     elif word[-2:] == "in":
         if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
             word = word[:-1] + "mpiä"
         else:
             word = word[:-1] + "mpia"
+        return [word]
         
 
     #numero
     elif word[-2:] == "ro" and syllables >= 3:
-        word += "ita"
+        return [word + "ita", word + "ja"]
 
     
     #u, o, ö, y -> + j + a/ä
     elif word[-1] in ("u", "o"):
         word += "ja"
-
+        return [word]
+    
     elif word[-1] in ("y", "ö"):
         word += "jä"
-
+        return [word]
 
     #i -> e change
     # when there is no change in i -> e sg, there is change in pl, if there is change in i->e > no change in pl
@@ -706,6 +808,7 @@ def partitive_pl(word) -> str:
             word = word[:-1] + "ejä"
         else:
             word = word[:-1] + "eja"
+        return [word]
 
         #I to E, need to work on 
     #All thanks to my beautiful girlfriend Maria that helped me with this program <3
@@ -713,53 +816,42 @@ def partitive_pl(word) -> str:
 
     elif word[-3:] == "kas":
         word = word[:-2] + "kaita"
+        return [word]
     
     elif word[-3:] == "käs":
         word = word[:-2] + "käitä"
+        return [word]
 
     elif word[-3:] == "tar":
         word = word[:-2] + "taria"
+        return [word]
 
     elif word[-2:] == "ar":
         word += "ia"
+        return [word]
     
     elif word[-3:] == "pas":
         word = word[:-2] + "paita"
+        return [word]
 
     elif word[-4:] == "rras":
         word = word[:-3] + "taita"
+        return [word]
 
     elif word[-4:] == "ngas":
         word = word[:-3] + "kaita"
+        return [word]
 
     elif word[-4:] == "llas":
         word = word[:-3] + "taita"
+        return [word]
 
     elif word[-2:] == "as":
         word = word[:-1] + "ita"
+        return [word]
               
 
-
-    #partitive_sg(word:str)
-
-    return word
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return [word]
 
 
 # --- 1. SESSION STATE INIT ---
@@ -918,16 +1010,27 @@ components.html(f"""
     setInterval(applyFix, 300);
 </script>
 """, height=0)
+
 def handle_submit():
     current_key = f"in_{s['input_key_suffix']}"
     user_val = st.session_state.get(current_key, "").strip().lower()
     if not user_val: return
 
     word, case = s["quiz"][s["idx"]]
-    correct = partitive_sg(word).lower() if case in ["SG", "Singular"] else partitive_pl(word).lower()
-    s["correct_answer"] = correct
+    
+    # 1. Get the answer(s). If it's a list, lowercase every item in it.
+    raw_ans = partitive_sg(word) if case in ["SG", "Singular"] else partitive_pl(word)
+    
+    if isinstance(raw_ans, list):
+        correct_list = [a.lower() for a in raw_ans]
+    else:
+        correct_list = [raw_ans.lower()]
 
-    if user_val == correct:
+    # 2. Store the primary answer for display (usually the first one)
+    s["correct_answer"] = " or ".join(correct_list)
+
+    # 3. Check if the user's input matches ANY of the correct answers
+    if user_val in correct_list:
         if s["missed_current"]:
             s["score"]["wrong"] += 1
         else:
@@ -939,7 +1042,7 @@ def handle_submit():
         if (word, case) not in s["to_repair"]:
             s["to_repair"].append((word, case))
         s["missed_current"] = True
-        s["input_key_suffix"] += 1
+        s["input_key_suffix"] += 1 # Added the increment here just in case
 
 def next_question():
     s["idx"] += 1
@@ -960,26 +1063,23 @@ def next_question():
     st.rerun()
 # --- 4. LOGIC HANDLERS (Updated for Custom Mode) ---
 def start_quiz(word_source, num, mode):
-    # Pokud je word_source slovník (WORDS), vezmeme jen jeho klíče (finská slova)
-    if isinstance(word_source, dict):
-        word_list = list(word_source.keys())
-    else:
-        word_list = list(word_source) # Pro Custom List (vstup z text_area)
-
-    # Zamezíme chybě, pokud chce uživatel víc slov, než máme
-    sample_size = min(num, len(word_list))
-    selected = random.sample(word_list, sample_size)
+    # 1. Reset everything for a fresh start
+    s["idx"] = 0
+    s["score"]["correct"] = 0
+    s["score"]["wrong"] = 0
+    s["to_repair"] = []
+    s["feedback"] = None
+    s["show_reveal"] = False
     
-    # Vytvoření seznamu dvojic (slovo, pád) pro kvíz
+    # 2. Select words and set mode
+    sample_size = min(num, len(word_source))
+    selected = random.sample(list(word_source), sample_size)
+    
+    # 3. Create the quiz list
     s["quiz"] = [(w, mode if mode != "Mixed" else random.choice(["Singular", "Plural"])) for w in selected]
     
-    # Resetování stavů
-    s["to_repair"] = []
-    s["idx"], s["score"]["correct"], s["score"]["wrong"] = 0, 0, 0
-    s["view"], s["feedback"] = "game", None
-    s["show_english"] = False  # Důležité pro animaci
-    s["repair_initialized"] = False
-    st.rerun()
+    # 4. Change the view
+    s["view"] = "game"
 
 # --- 5. VIEWS ---
 if s["view"] == "menu":
@@ -1001,6 +1101,7 @@ if s["view"] == "menu":
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Start Standard Quiz", use_container_width=True, type="secondary"):
                 start_quiz(WORDS, num_std, mode_std)
+                st.rerun()
             
 
 
@@ -1094,7 +1195,17 @@ elif s["view"] == "game":
     card_front_color = "#2c3e50"
 
     if s.get("show_reveal"):
-        card_front_text = s.get('correct_answer', "---")
+        # Pre-emptively get the correct answer in case handle_submit hasn't run
+        word, case = s["quiz"][s["idx"]]
+        raw_ans = partitive_sg(word) if case in ["SG", "Singular"] else partitive_pl(word)
+        
+        # Format the list into a single string separated by " or "
+        if isinstance(raw_ans, list):
+            display_answer = " or ".join(raw_ans).lower()
+        else:
+            display_answer = raw_ans.lower()
+            
+        card_front_text = display_answer
         card_front_label = "CORRECT"
         card_front_color = "#11a20a"
 
@@ -1147,83 +1258,90 @@ elif s["view"] == "game":
     </div>
     """, unsafe_allow_html=True)
 
-    # B. Viditelné tlačítko Flip PŘÍMO POD KARTOU
-    if st.button("Flip Card", key="flip_btn_visible", use_container_width=True):
-        s["show_english"] = not s.get("show_english", False)
-        st.rerun()
+     # --- 4. SJEDNOCENÁ AKČNÍ ZÓNA ---
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    container = st.container()
 
+    with container:
+        # 1. Flip Card (Vždy nahoře)
+        if st.button("Flip Card", key="flip_btn_visible", use_container_width=True):
+            s["show_english"] = not s.get("show_english", False)
+            st.rerun()
 
-    # 4. Input Field (Hides when revealing)
-    input_placeholder = st.empty()
-    if not s.get("show_reveal"):
-        with input_placeholder:
-            input_key = f"in_{s['input_key_suffix']}"
-            st.text_input(
-                "Answer", 
-                key=input_key, 
-                on_change=handle_submit, 
-                label_visibility="collapsed",
-                placeholder="Type the Finnish form..."
-            )
+        # 2. Spodní dynamická část (Input / Show Answer / Next Word)
+        # Použijeme st.empty(), aby se obsah měnil na stejném místě bez "poskočení"
+        action_spot = st.empty()
 
-    # 5. Success Logic (Fixes the "stops working after correct" issue)
-    if s["feedback"] == "correct":
-        if not s.get("correct_sound_played"):
-            play_audio("correct_sound.mp3")
-            s["correct_sound_played"] = True
-        st.success("✅ Correct!")
-        time.sleep(1.2)
-        next_question()
-        st.rerun()
-
-    elif s["feedback"] == "wrong" and not s.get("show_reveal"):
-            if not s.get("wrong_sound_played"):
-                play_audio("wrong_sound.mp3")
-                s["wrong_sound_played"] = True
-                
-            st.error("❌ Not quite right.")
-            
-            col_l, col_btn, col_r = st.columns([1, 1.5, 1])
-            with col_btn:
-                if st.button("Show answer", use_container_width=True):
-                    # --- OPRAVA: PŘIČTENÍ CHYBY ---
-                    s["wrong_sound_played"] = False 
-                    s["score"]["wrong"] += 1 
-                    
-                    # Uložíme do seznamu k opravě, pokud tam ještě není
-                    word_to_check, case_to_check = s["quiz"][s["idx"]]
-                    if (word_to_check, case_to_check) not in s["to_repair"]:
-                        s["to_repair"].append((word_to_check, case_to_check))
-                    
-                    s["show_reveal"] = True
-                    s["correct_answer"] = partitive_sg(word_to_check) if case_to_check in ["SG", "Singular"] else partitive_pl(word_to_check)
+        with action_spot.container():
+            if s.get("show_reveal"):
+                # 1. Zobrazíme tlačítko (pokud na něj uživatel klikne, timer se zruší díky rerunu)
+                if st.button("Next Word", use_container_width=True, key="next_btn_stable"):
+                    s["show_reveal"] = False
+                    next_question()
                     st.rerun()
 
-    # 7. Reveal State: Next Button + 4s Timer
-    if s.get("show_reveal"):
-        # Custom CSS for Blue Button
-        st.markdown("""<style>div.stButton > button:first-child { background-color: #2196F3 !important; color: white !important; font-weight: bold !important; }</style>""", unsafe_allow_html=True)
+                components.html(f"""
+                    <script>
+                        parent.setTimeout(() => {{
+                            // Najde tlačítko s textem "Next Word" a klikne na něj
+                            const buttons = parent.window.document.querySelectorAll("button");
+                            for (const btn of buttons) {{
+                                if (btn.innerText.includes("Next Word")) {{
+                                    btn.click();
+                                    break;
+                                }}
+                            }}
+                        }}, 5500);
+                    </script>
+                """, height=0)
 
-        col_l, col_btn, col_r = st.columns([1, 1.5, 1])
-        with col_btn:
-            # If user clicks manually, we move on immediately
-            if st.button("Next Word →", use_container_width=True):
-                s["show_reveal"] = False
-                s["feedback"] = None
+            elif s["feedback"] == "wrong":
+                if not s.get("wrong_sound_played"):
+                    play_audio("wrong_sound.mp3")
+                    s["wrong_sound_played"] = True
+
+                # --- TADY JE ZMĚNA: Zobrazíme input i při chybě ---
+                input_key = f"in_{s['input_key_suffix']}"
+                st.text_input(
+                    "Answer", 
+                    key=input_key, 
+                    on_change=handle_submit, 
+                    label_visibility="collapsed",
+                    placeholder="Try again..."
+                )
+            
+                st.error("❌ Not quite right.")
+            
+                if st.button("Show answer", use_container_width=True, key="reveal_btn_stable"):
+                    s["score"]["wrong"] += 1
+                    if (word, case) not in s["to_repair"]:
+                        s["to_repair"].append((word, case))
+                    s["show_reveal"] = True
+                    s["feedback"] = None
+                    st.rerun()
+
+            elif s["feedback"] == "correct":
+                if not s.get("correct_sound_played"):
+                    play_audio("correct_sound.mp3")
+                    s["correct_sound_played"] = True
+
+                st.success("✅ Correct!")
+                time.sleep(1.2)
                 next_question()
                 st.rerun()
 
-        # --- SMART TIMER ---
-        # We only run the timer if the state hasn't been cleared by the button above
-        time.sleep(4.0)
-        if s.get("show_reveal"): # Check if user didn't already click 'Next'
-            s["show_reveal"] = False
-            s["feedback"] = None
-            next_question()
-            st.rerun()
+            else:
+                # Vstupní pole
+                input_key = f"in_{s['input_key_suffix']}"
+                st.text_input(
+                    "Answer", 
+                    key=input_key, 
+                    on_change=handle_submit, 
+                    label_visibility="collapsed",
+                    placeholder="Type the Finnish form..."
+                )
 
-    st.markdown('</div>', unsafe_allow_html=True)
-                    
 elif s["view"] == "results":
     st.title("Quiz Results")
    
@@ -1275,7 +1393,7 @@ elif s["view"] == "results":
                 s["idx"] = 0
                 s["view"] = "repair"
                 st.rerun()
-                
+
 elif s["view"] == "repair":
     # 0. Session Initialization (Ensures 3 fresh hearts at start)
     if s.get("idx") == 0 and not s.get("repair_initialized"):
@@ -1337,16 +1455,24 @@ elif s["view"] == "repair":
             st.rerun()
 
         elif s["feedback"] == "wrong":
-            # Check if this is a NEW wrong submission (using the input key suffix)
-            # This ensures 1 submit = 1 heart lost, even if Streamlit reruns
-            if not s.get("last_processed_submit") == s["input_key_suffix"]:
-                st.audio(wrong_sound, format="audio/mpeg", autoplay=True)
-                s["lives"] -= 1
-                s["last_processed_submit"] = s["input_key_suffix"]
-                s["feedback"] = None
-                st.rerun() # Immediate visual update of hearts
+            # 1. Okamžité přehrání zvuku
+            play_audio("wrong_sound.mp3")
             
-            st.error(f"❌ Wrong! Hearts: {s['lives']}/3")
+            # 2. Zobrazení chyby (aby uživatel viděl, co se děje během sleepu)
+            st.error(f"❌ Wrong! Hearts: {s['lives'] - 1}/3") 
+            
+            # 3. Aktualizace stavu
+            s["lives"] -= 1
+            s["last_processed_submit"] = s["input_key_suffix"]
+            s["feedback"] = None
+            
+            # 4. Pauza, aby dozněl zvuk a uživatel viděl chybu
+            time.sleep(1.0)
+            
+            # 5. Refresh pro aktualizaci UI (srdíček v sidebaru apod.)
+            st.rerun()
+            
+                
             
             if s["lives"] <= 0:
-                st.rerun() # Trigger Game Over check at the top
+                st.rerun() 
