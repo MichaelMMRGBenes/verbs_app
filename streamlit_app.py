@@ -9,7 +9,7 @@ def play_audio(file_path):
     with open(file_path, "rb") as f:
         data = f.read()
         b64 = base64.b64encode(data).decode()
-        # Přidání unikátního ID pomocí timestampu
+        # Přidání unikátního ID pomocí timestampu   
         unique_id = f"audio_{int(time.time() * 1000)}"
         md = f"""
             <audio id="{unique_id}" autoplay="true" style="display:none;">
@@ -20,36 +20,97 @@ def play_audio(file_path):
 # --- 0. PLACEHOLDER DATA & LOGIC (Replace with your actual logic) ---
 
 WORDS = {
-    # Animals & Nature
+    # --- CLOTHING & ACCESSORIES (Countable) ---
+    "vaate": "clothes", "paita": "shirt", "hame": "skirt", "mekko": "dress", "takki": "jacket",
+    "hattu": "hat", "pipo": "beanie", "käsine": "glove", "sukka": "sock", "kenkä": "shoe",
+    "saapas": "boot", "vyö": "belt", "huivi": "scarf", "solmio": "tie", "puku": "suit",
+    "tasku": "pocket", "nappi": "button", "vetoketju": "zipper", "sateenvarjo": "umbrella",
+    "laukku": "bag", "reppu": "backpack", "lompakko": "wallet", "sormus": "ring",
+    "kaulakoru": "necklace", "rannekello": "wristwatch", "pusero": "blouse", "huppari": "hoodie",
+    "neule": "knitwear item", "liivi": "vest", "yöpaita": "nightshirt", "kravatti": "necktie",
+    "rusetti": "bow tie", "kaulaliina": "scarf", "lapanen": "mitten", "sormikas": "fingered glove",
+    "sandaali": "sandal", "tohveli": "slipper", "kumisaapas": "rubber boot", "solki": "buckle",
+    # --- ABSTRACT & MASS NOUNS (Re-added) ---
+    "vesi": "water", "rakkaus": "love", "onni": "happiness/luck", "ilma": "air",
+    "lumi": "snow", "hiekka": "sand", "multa": "soil", "ruoka": "food",
+    "juoma": "drink", "maito": "milk", "kahvi": "coffee", "tee": "tea",
+  "viini": "wine", "mehu": "juice", "veri": "blood",
+    "rauta": "iron (metal)", "kulta": "gold", "hopea": "silver", "kupari": "copper",
+    "öljy": "oil", "sokeri": "sugar", "suola": "salt", "jauho": "flour",
+    "hunaja": "honey", "liha": "meat", "apu": "help", "voima": "power",
+    "valo": "light", "pimeys": "darkness", "lämpö": "heat", "kylmyys": "coldness",
+    "aika": "time", "elämä": "life", "kuolema": "death", "toivo": "hope",
+    "pelko": "fear", "viha": "hate", "suru": "sorrow", "ilo": "joy",
+    "rauha": "peace", "sota": "war", "vapaus": "freedom", "totuus": "truth",
+    "valhe": "lie", "tieto": "knowledge", "taito": "skill", "usko": "faith",
+
+    # --- ADJECTIVES (New Category) ---
+    "suuri": "large", "pieni": "small", "pitkä": "long/tall", "lyhyt": "short",
+    "paksu": "thick", "ohut": "thin", "leveä": "wide", "kapea": "narrow",
+    "uusi": "new", "vanha": "old", "nuori": "young", "rikas": "rich",
+    "köyhä": "poor", "kaunis": "beautiful", "ruma": "ugly", "hyvä": "good",
+    "paha": "bad", "iloinen": "happy", "surullinen": "sad", "viisas": "wise",
+    "tyhmä": "stupid", "vahva": "strong", "heikko": "weak", "nopea": "fast",
+    "hidas": "slow", "kuuma": "hot", "kylmä": "cold", "lämmin": "warm",
+    "viileä": "cool", "kuiva": "dry", "märkä": "wet", "kova": "hard",
+    "pehmeä": "soft", "kallis": "expensive", "halpa": "cheap", "painava": "heavy",
+    "kevyt": "light (weight)", "pimeä": "dark", "kirkas": "bright", "puhdas": "clean",
+    "likainen": "dirty", "täysi": "full", "tyhjä": "empty", "terve": "healthy",
+    "sairas": "sick", "rehellinen": "honest", "hauska": "funny", "tylsä": "boring",
+    "outo": "strange", "tavallinen": "ordinary", "erilainen": "different",
+    "punainen": "red", "sininen": "blue", "vihreä": "green", "keltainen": "yellow",
+    "musta": "black", "valkoinen": "white", "harmaa": "gray", "ruskea": "brown",
+    "oranssi": "orange (colour)", "violetti": "purple", "vaaleanpunainen": "pink", "paita": "shirt", "hame": "skirt", "mekko": "dress", "takki": "jacket",
+    "hattu": "hat", "pipo": "beanie", "käsine": "glove", "sukka": "sock", "kenkä": "shoe",
+    "saapas": "boot", "vyö": "belt", "solmio": "tie", "puku": "suit",
+    "tasku": "pocket", "nappi": "button", "vetoketju": "zipper", "sateenvarjo": "umbrella",
+    "laukku": "bag", "reppu": "backpack", "lompakko": "wallet", "sormus": "ring",
+    "kaulakoru": "necklace", "rannekello": "wristwatch", "pusero": "blouse", "huppari": "hoodie",
+    "neule": "knitwear", "liivi": "vest", "yöpaita": "nightshirt", "kravatti": "necktie",
+    "rusetti": "bow tie", "lapanen": "mitten", "sormikas": "fingered glove",
+    "sandaali": "sandal", "tohveli": "slipper", "kumisaapas": "rubber boot", "solki": "buckle",
+    "hihna": "strap", "hiha": "sleeve", "lahje": "trouser leg", "kaulus": "collar", "henkseli": "suspender",
+    "uimapuku": "swimsuit", "viitta": "cloak", "otsanauha": "headband", "rintakoru": "brooch",
+    "lippalakki": "baseball cap", "baretti": "beret", "turkki": "fur coat", "lenkkari": "sneaker",
+
+    # --- ANIMALS & BIOLOGY ---
+    "orava": "squirrel", "siili": "hedgehog", "hirvi": "moose", "peura": "deer", "karitsa": "lamb",
+    "vuohi": "goat", "ankka": "duck", "hanhi": "goose", "kana": "hen", "kukko": "rooster",
+    "pöllö": "owl", "kotka": "eagle", "varis": "crow", "harakka": "magpie", "pääskynen": "swallow",
+    "muurahainen": "ant", "mehiläinen": "bee", "hämähäkki": "spider", "itikka": "mosquito",
+    "perhonen": "butterfly", "valas": "whale", "hylje": "seal", "rapu": "crab", "etana": "snail",
     "koira": "dog", "kissa": "cat", "hevonen": "horse", "lehmä": "cow", "lammas": "sheep",
     "sika": "pig", "karhu": "bear", "susi": "wolf", "kettu": "fox", "jänis": "hare",
     "lintu": "bird", "kala": "fish", "käärme": "snake", "hyönteinen": "insect", "puu": "tree",
     "kukka": "flower", "metsä": "forest", "järvi": "lake", "meri": "sea", "joki": "river",
     "vuori": "mountain", "mäki": "hill", "saari": "island", "niemi": "peninsula", "ranta": "shore",
     "taivas": "sky", "aurinko": "sun", "kuu": "moon", "tähti": "star", "pilvi": "cloud",
-    "sade": "rain", "lumi": "snow", "jää": "ice", "tuuli": "wind", "ukkonen": "thunder",
-    "kivi": "stone", "hiekka": "sand", "multa": "soil", "ruoho": "grass", "lehti": "leaf",
-    "oksa": "branch", "juuri": "root", "marja": "berry", "sieni": "mushroom", "puro": "brook",
-    "lähde": "spring", "suo": "swamp", "tunturi": "fell", "luonto": "nature",
-    
-    # People & Family
-    "mies": "man", "nainen": "woman", "lapsi": "child", "poika": "boy", "tyttö": "girl",
-    "vauva": "baby", "isä": "father", "äiti": "mother", "veli": "brother", "sisko": "sister",
-    "tytär": "daughter", "isoäiti": "grandmother", "isoisä": "grandfather", "serkku": "cousin",
-    "täti": "aunt", "setä": "uncle (paternal)", "eno": "uncle (maternal)", "perhe": "family",
-    "suku": "relatives", "ystävä": "friend", "naapuri": "neighbor", "ihminen": "human",
-    "henkilö": "person", "vieras": "guest", "isäntä": "host", "emäntä": "hostess", "vaimo": "wife",
-    "pari": "couple",
-    
-    # Body Parts
+    "ukkonen": "thunder", "kivi": "stone", "lehti": "leaf", "oksa": "branch", "juuri": "root",
+    "marja": "berry", "sieni": "mushroom", "puro": "brook", "lähde": "spring", "tunturi": "fell",
+    "ilves": "lynx", "poro": "reindeer", "myyrä": "mole", "lepakko": "bat", "joutsen": "swan",
+    "sorsa": "duck", "lokki": "gull", "tikka": "woodpecker", "kimalainen": "bumblebee",
+    "kärpänen": "fly", "mato": "worm", "sammakko": "frog", "sisilisko": "lizard", "koivu": "birch",
+    "mänty": "pine", "kuusi": "spruce", "tammi": "oak", "vaahtera": "maple",
+    "kanto": "stump", "neulanen": "needle", "käpy": "cone", "oja": "ditch", "lampi": "pond",
+    "lahti": "bay", "salmi": "strait", "koski": "rapids", "vesiputous": "waterfall",
+    "jyrkänne": "cliff", "huippu": "peak", "rinne": "slope", "laakso": "valley", "kyy": "viper",
+    "ahven": "perch", "hauki": "pike", "lohi": "salmon", "tiikeri": "tiger", "leijona": "lion",
+    "norsu": "elephant", "kirahvi": "giraffe", "apina": "monkey", "seepra": "zebra",
+    "krokotiili": "crocodile", "kilpikonna": "turtle", "pingviini": "penguin", "kameli": "camel",
+
+    # --- BODY PARTS ---
     "pää": "head", "silmä": "eye", "korva": "ear", "nenä": "nose", "suu": "mouth",
-    "huuli": "lip", "hammas": "tooth", "kieli": "tongue", "kaula": "neck",
-    "kurkku": "throat", "olkapää": "shoulder", "käsivarsi": "arm", "käsi": "hand",
-    "sormi": "finger", "kynsi": "nail", "rinta": "chest", "vatsa": "stomach", "selkä": "back",
-    "jalka": "leg", "polvi": "knee", "varvas": "toe", "iho": "skin", "luu": "bone",
-    "veri": "blood", "sydän": "heart", "keuhko": "lung", "lihas": "muscle", "naama": "face",
-    
-    # House & Household
+    "huuli": "lip", "hammas": "tooth", "kieli": "tongue", "kaula": "neck", "kurkku": "throat",
+    "olkapää": "shoulder", "käsivarsi": "arm", "käsi": "hand", "sormi": "finger", "kynsi": "nail (finger)",
+    "rinta": "chest", "vatsa": "stomach", "selkä": "back", "jalka": "leg", "polvi": "knee",
+    "varvas": "toe", "iho": "skin", "luu": "bone", "sydän": "heart", "keuhko": "lung",
+    "lihas": "muscle", "naama": "face", "maksa": "liver", "munuainen": "kidney", "nivel": "joint",
+    "verisuoni": "blood vessel", "hermo": "nerve", "otsa": "forehead", "leuka": "chin",
+    "poski": "cheek", "kulmakarva": "eyebrow", "ripsi": "eyelash", "napa": "navel",
+    "vyötärö": "waist", "kyynärpää": "elbow", "ranne": "wrist", "kämmen": "palm",
+    "lantio": "pelvis", "reisi": "thigh", "pohje": "calf", "nilkka": "ankle", "kantapää": "heel",
+
+    # --- HOUSE & EVERYDAY OBJECTS ---
     "talo": "house", "koti": "home", "asunto": "apartment", "huone": "room", "keittiö": "kitchen",
     "kylpyhuone": "bathroom", "makuuhuone": "bedroom", "olohuone": "living room", "eteinen": "hall",
     "parveke": "balcony", "piha": "yard", "ovi": "door", "ikkuna": "window", "seinä": "wall",
@@ -58,37 +119,333 @@ WORDS = {
     "hylly": "shelf", "lamppu": "lamp", "matto": "carpet", "verho": "curtain", "peili": "mirror",
     "taulu": "picture", "kello": "clock", "radio": "radio", "televisio": "television",
     "tietokone": "computer", "puhelin": "telephone", "kone": "machine", "uuni": "oven",
-    "hella": "stove", "allas": "basin",
-    
-    # Kitchen & Food
-    "ruoka": "food", "juoma": "drink", "vesi": "water", "maito": "milk", "kahvi": "coffee",
-    "tee": "tea", "mehu": "juice", "olut": "beer", "viini": "wine", "leipä": "bread",
-    "voi": "butter", "juusto": "cheese", "liha": "meat", "kana": "chicken", "muna": "egg",
-    "makkara": "sausage", "peruna": "potato", "riisi": "rice", "pasta": "pasta",
-    "vihannes": "vegetable", "hedelmä": "fruit", "omena": "apple", "banaani": "banana",
-    "suola": "salt", "sokeri": "sugar", "jauho": "flour", "öljy": "oil", "kastike": "sauce",
-    "lautanen": "plate", "kulho": "bowl", "lasi": "glass", "muki": "mug", "kuppi": "cup",
-    "veitsi": "knife", "haarukka": "fork", "lusikka": "spoon", "kattila": "pot", "pannu": "pan",
+    "hella": "stove", "allas": "basin", "lautanen": "plate", "kulho": "bowl", "muki": "mug",
+    "kuppi": "cup", "veitsi": "knife", "haarukka": "fork", "lusikka": "spoon", "kattila": "pot (cooking)",
+    "pannu": "pan", "astianpesukone": "dishwasher", "pyykinpesukone": "washing machine",
+    "pakastin": "freezer", "mikroaaltouuni": "microwave", "leivänpaahdin": "toaster",
+    "vedenkeitin": "kettle", "tehosekoitin": "blender", "vatkain": "mixer", "kahvinkeitin": "coffee maker",
+    "imuri": "vacuum cleaner", "silitysrauta": "iron", "laatikko": "drawer", "tiskiallas": "sink",
+    "hana": "faucet", "roskakori": "trash can", "tiskiharja": "dish brush", "sieni": "sponge",
+    "liina": "cloth", "tyyny": "pillow", "peitto": "blanket", "lakana": "sheet", "pyyhe": "towel",
+    "henkari": "hanger", "kampa": "comb", "hammasharja": "toothbrush", "vasara": "hammer",
+    "saha": "saw", "ruuvimeisseli": "screwdriver", "ruuvi": "screw",
+    "ämpäri": "bucket", "harja": "brush", "luuta": "broom", "lapio": "shovel", "akku": "battery",
+    "johto": "cord", "pistorasia": "socket", "sytytin": "lighter", "kynttilä": "candle",
+    "taskulamppu": "flashlight", "mutteri": "nut (tool)", "porakone": "drill", "pultti": "bolt",
+    "jakkara": "stool", "nojatuoli": "armchair", "kirjahylly": "bookshelf", "lipasto": "chest",
 
-    # Transportation & City
+    # --- FOOD & INGREDIENTS ---
+    "makkara": "sausage", "peruna": "potato", "vihannes": "vegetable", "hedelmä": "fruit",
+    "omena": "apple", "banaani": "banana", "sipuli": "onion", "valkosipuli": "garlic",
+    "porkkana": "carrot", "kurkku": "cucumber", "tomaatti": "tomato", "paprika": "bell pepper",
+    "salaatti": "lettuce", "kaali": "cabbage", "herne": "pea", "papu": "bean", "maissi": "corn",
+    "päärynä": "pear", "luumu": "plum", "viinirypäle": "grape", "mansikka": "strawberry",
+    "mustikka": "blueberry", "vadelma": "raspberry", "sitruuna": "lemon", "appelsiini": "orange",
+    "pähkinä": "nut", "siemen": "seed", "leivonnainen": "pastry", "kakku": "cake", "keksi": "cookie",
+    "leipä": "loaf", "sämpylä": "roll", "piirakka": "pie", "munkki": "donut", "pulla": "bun",
+
+    # --- TRANSPORT & CITY ---
     "auto": "car", "bussi": "bus", "juna": "train", "lentokone": "airplane", "laiva": "ship",
-    "vene": "boat", "pyörä": "bicycle", "moottoripyörä": "motorcycle", "tie": "road", "katu": "street",
-    "polku": "path", "silta": "bridge", "tunneli": "tunnel", "asema": "station", "satama": "harbor",
-    "tori": "market", "puisto": "park", "kaupunki": "city", "kylä": "village", "maa": "country",
-    "valtio": "state", "raja": "border", "keskusta": "center", "kauppa": "shop", "pankki": "bank",
-    "sairaala": "hospital", "koulu": "school", "kirkko": "church", "tehdas": "factory",
-    "hotelli": "hotel", "ravintola": "restaurant", "kahvila": "cafe", "museo": "museum",
-    "kirjasto": "library", "teatteri": "theater", "poliisi": "police", "posti": "post", "apteekki": "pharmacy",
+    "vene": "boat", "pyörä": "bicycle", "moottoripyörä": "motorcycle", "tie": "road",
+    "katu": "street", "polku": "path", "silta": "bridge", "tunneli": "tunnel", "asema": "station",
+    "satama": "harbor", "tori": "market", "puisto": "park", "kaupunki": "city", "kylä": "village",
+    "kauppa": "shop", "pankki": "bank", "sairaala": "hospital", "koulu": "school",
+    "kirkko": "church", "tehdas": "factory", "hotelli": "hotel", "ravintola": "restaurant",
+    "kahvila": "cafe", "museo": "museum", "kirjasto": "library", "teatteri": "theater",
+    "apteekki": "pharmacy", "lentokenttä": "airport", "laituri": "platform", "rekka": "truck",
 
-    # Time & Abstract
-    "aika": "time", "hetki": "moment", "sekunti": "second", "minuutti": "minute", "tunti": "hour",
-    "päivä": "day", "viikko": "week", "kuukausi": "month", "vuosi": "year", "vuosisata": "century",
-    "aamu": "morning", "ilta": "evening", "yö": "night", "maanantai": "Monday", "tiistai": "Tuesday",
+    # --- WORK, MEDIA & EDUCATION ---
+    "opiskelija": "student", "opettaja": "teacher", "rehtori": "principal", "luokka": "class",
+    "kurssi": "course", "koe": "test", "arvosana": "grade", "kynä": "pen",
+    "lyijykynä": "pencil", "pyyhekumi": "eraser", "viivain": "ruler", "vihko": "notebook",
+    "kirja": "book", "sanakirja": "dictionary", "ammatti": "profession", "kokous": "meeting",
+    "sopimus": "contract", "asiakas": "customer", "pomo": "boss", "työpaikka": "workplace",
+    "yritys": "company", "sanomalehti": "newspaper", "aikakauslehti": "magazine",
+    "mainos": "advertisement", "näyttö": "monitor", "näppäimistö": "keyboard", "hiiri": "mouse",
+    "tulostin": "printer", "laturi": "charger", "kaapeli": "cable", "kaiutin": "speaker",
+    "sovellus": "application", "tiedosto": "file", "kansio": "folder", "salasana": "password",
+    "viesti": "message", "lasku": "bill", "kuitti": "receipt", "allekirjoitus": "signature",
+
+    # --- TIME & NUMBERS ---
+    "sekunti": "second", "minuutti": "minute", "tunti": "hour", "päivä": "day", "viikko": "week",
+    "kuukausi": "month", "vuosi": "year", "vuosisata": "century", "aamu": "morning",
+    "ilta": "evening", "yö": "night", "maanantai": "Monday", "tiistai": "Tuesday",
+    "keskiviikko": "Wednesday", "torstai": "Thursday", "perjantai": "Friday",
+    "lauantai": "Saturday", "sunnuntai": "Sunday", "numero": "number", "hetki": "moment",
+
+    # --- MUSICAL INSTRUMENTS (New) ---
+    "kitara": "guitar", "piano": "piano", "viulu": "violin", "rumpu": "drum", "huilu": "flute",
+    "trumpetti": "trumpet", "basso": "bass", "haitari": "accordion",
+    "saksofoni": "saxophone", "kantele": "kantele",
+
+    # --- TOOLS & TECHNICAL (New) ---
+    "ruuvitaltta": "screwdriver", "mutteriavain": "wrench", "pora": "drill",
+    "hiomakone": "sander", "sirkkeli": "circular saw", "höylä": "plane", "taltta": "chisel",
+    "viila": "file", "leka": "sledgehammer", "sorkkarauta": "crowbar", 
+    "generaattori": "generator", "kompressori": "compressor", "hitsauskone": "welder",
+    "pumppu": "pump", "venttiili": "valve", "mittari": "meter", "anturi": "sensor",
+
+    # --- PROFESSIONS (Expanded) ---
+    "lääkäri": "doctor", "hoitaja": "nurse", "poliisi": "police officer", "palomies": "firefighter",
+    "lentäjä": "pilot", "kokki": "cook", "tarjoilija": "waiter", "myyjä": "salesperson",
+    "insinööri": "engineer", "arkkitehti": "architect", "taiteilija": "artist",
+    "muusikko": "musician", "kirjailija": "author", "lakimies": "lawyer", "tuomari": "judge",
+    "pappi": "priest", "siivooja": "cleaner", "mekaanikko": "mechanic", "leipuri": "baker",
+
+    # --- MORE ADJECTIVES ---
+    "makea": "sweet", "suolainen": "salty", "hapan": "sour", "karvas": "bitter",
+    "terävä": "sharp", "tylsä": "blunt/dull", "matala": "low", "korkea": "high",
+    "syvä": "deep", "matala": "shallow", "pyöreä": "round", "neliö": "square",
+    "tasainen": "flat/even", "epätasainen": "uneven", "liukas": "slippery",
+    "karhea": "rough", "kirkas": "clear", "samea": "cloudy", "himmeä": "dim",
+    "äänekäs": "loud", "hiljainen": "quiet", "rauhallinen": "calm", "villi": "wild",
+    "arka": "shy", "rohkea": "brave", "ylpeä": "proud", "nöyrä": "humble",
+    "vihais": "angry", "lempeä": "gentle", "ankara": "strict", "reilu": "fair",
+    "itsekäs": "selfish", "avokätinen": "generous", "ahkera": "hardworking",
+    "laiska": "lazy", "huolellinen": "careful", "huolimaton": "careless",
+    "tärkeä": "important", "tarpeellinen": "necessary", "turha": "useless",
+    "vaikea": "difficult", "helppo": "easy", "mahdollinen": "possible",
+    "mahdoton": "impossible", "totinen": "serious", "hauska": "funny",
+
+    # --- PLANTS & GARDEN ---
+    "ruusu": "rose", "tulppaani": "tulip", "voikukka": "dandelion", "lilja": "lily",
+    "apila": "clover", "sammal": "moss", "jäkälä": "lichen", "varpu": "shrub",
+    "pensas": "bush", "heinä": "hay", "olki": "straw", "sipulikasvi": "bulb plant",
+    "taimi": "seedling", "pistokas": "cutting", "siemen": "seed", "hedelmäpuu": "fruit tree",
+
+    # --- HOBBIES & SPORTS ---
+    "pallo": "ball", "maila": "racket", "verkko": "net", "maali": "goal", "rata": "track",
+    "kenttä": "field", "kypärä": "helmet", "suksi": "ski", "luistin": "skate",
+    "lauta": "board", "purje": "sail", "mela": "paddle", "vapa": "fishing rod",
+    "koukku": "hook", "uistin": "lure", "teltta": "tent", "reppu": "backpack",
+
+    # --- MISC COUNTABLE NOUNS ---
+    "esine": "object", "kappale": "piece/song", "osa": "part", "ryhmä": "group",
+    "joukko": "crowd/set", "pino": "pile", "kasa": "heap", "rivi": "row",
+    "jono": "queue", "aukko": "gap", "reikä": "hole", "rako": "crack",
+    "pinta": "surface", "reuna": "edge", "kulma": "corner", "keskipiste": "center",
+    "ympyrä": "circle", "viiva": "line", "piste": "dot", "merkki": "sign/mark",
+    "symboli": "symbol", "kuva": "image", "varjo": "shadow", "heijastus": "reflection",
+    "ääni": "sound/voice", "melu": "noise", "kaiku": "echo", "haju": "smell",
+    "tuoksu": "scent", "maku": "taste", "tunne": "feeling", "aisti": "sense",
+    "hihna": "strap", "hiha": "sleeve", "lahje": "trouser leg", "kaulus": "collar", "henkseli": "suspender",
+    "uimapuku": "swimsuit", "viitta": "cloak", "otsanauha": "headband",
+    "rintakoru": "brooch", "kalvosinnappi": "cufflink", "lippalakki": "baseball cap", "baretti": "beret",
+    "maailma": "world", "planeetta": "planet", "salama": "lightning bolt", "myrsky": "storm",
+    "tulva": "flood", "maanjäristys": "earthquake", "tulivuori": "volcano", "aavikko": "desert",
+    "viidakko": "jungle", "luola": "cave", "hiekkaranta": "sandy beach", "valtameri": "ocean",
+    "aalto": "wave", "rannikko": "coast", "orava": "squirrel", "siili": "hedgehog", "hirvi": "moose",
+    "peura": "deer", "karitsa": "lamb", "vuohi": "goat", "ankka": "duck", "hanhi": "goose",
+    "kana": "hen", "kukko": "rooster", "pöllö": "owl", "kotka": "eagle", "varis": "crow",
+    "harakka": "magpie", "pääskynen": "swallow", "muurahainen": "ant", "mehiläinen": "bee",
+    "hämähäkki": "spider", "itikka": "mosquito", "perhonen": "butterfly", "valas": "whale",
+    "hylje": "seal", "rapu": "crab", "koira": "dog", "kissa": "cat",
+    "hevonen": "horse", "lehmä": "cow", "lammas": "sheep", "sika": "pig", "karhu": "bear",
+    "susi": "wolf", "kettu": "fox", "jänis": "hare", "lintu": "bird", "kala": "fish",
+    "käärme": "snake", "hyönteinen": "insect", "puu": "tree", "kukka": "flower", "metsä": "forest",
+    "järvi": "lake", "meri": "sea", "joki": "river", "vuori": "mountain", "mäki": "hill",
+    "saari": "island", "niemi": "peninsula", "ranta": "shore", "taivas": "sky", "aurinko": "sun",
+    "kuu": "moon", "tähti": "star", "pilvi": "cloud", "ukkonen": "thunderclap", "kivi": "stone",
+    "lehti": "leaf", "oksa": "branch", "juuri": "root", "marja": "berry", "sieni": "mushroom",
+    "puro": "brook", "lähde": "spring", "tunturi": "fell", "ilves": "lynx", "poro": "reindeer",
+    "myyrä": "mole", "lepakko": "bat", "joutsen": "swan", "sorsa": "wild duck", "lokki": "gull",
+    "tikka": "woodpecker", "kimalainen": "bumblebee", "kärpänen": "fly", "mato": "worm",
+    "sammakko": "frog", "sisilisko": "lizard", "koivu": "birch", "mänty": "pine", "kuusi": "spruce",
+    "tammi": "oak", "vaahtera": "maple", "pihlaja": "rowan", "kanto": "stump", "neulanen": "needle",
+    "käpy": "cone", "oja": "ditch", "lampi": "pond", "lahti": "bay", "salmi": "strait",
+    "koski": "rapids", "vesiputous": "waterfall", "jyrkänne": "cliff", "huippu": "peak",
+    "rinne": "slope", "laakso": "valley", "kyy": "viper", "rantakäärme": "grass snake",
+    "ahven": "perch", "hauki": "pike", "lohi": "salmon", "siika": "whitefish", "muikku": "vendace",
+    "simpukka": "shell", "mustekala": "octopus", "meduusa": "jellyfish", "lokki": "seagull",
+    "pulu": "pigeon", "tiikeri": "tiger", "leijona": "lion", "norsu": "elephant", "kirahvi": "giraffe",
+    "apina": "monkey", "seepra": "zebra", "krokotiili": "crocodile", "kilpikonna": "turtle",
+    "pingviini": "penguin", "kameli": "camel", "papukaija": "parrot", "lepakko": "bat",
+    "päästäinen": "shrew", "majava": "beaver", "vesikko": "mink", "näätä": "marten",
+    "kärppä": "ermine", "ahma": "wolverine", "mursu": "walrus", "pingviini": "penguin",
+
+    # --- BODY PARTS (Countable) ---
+    "pää": "head", "silmä": "eye", "korva": "ear", "nenä": "nose", "suu": "mouth",
+    "huuli": "lip", "hammas": "tooth", "kieli": "tongue", "kaula": "neck", "kurkku": "throat",
+    "olkapää": "shoulder", "käsivarsi": "arm", "käsi": "hand", "sormi": "finger", "rinta": "chest", "vatsa": "stomach", "selkä": "back", "jalka": "leg", "polvi": "knee",
+    "varvas": "toe", "iho": "skin", "luu": "bone", "sydän": "heart", "keuhko": "lung",
+    "lihas": "muscle", "naama": "face", "maksa": "liver", "munuainen": "kidney", "nivel": "joint",
+    "verisuoni": "blood vessel", "hermo": "nerve", "otsa": "forehead", "leuka": "chin",
+    "poski": "cheek", "kulmakarva": "eyebrow", "ripsi": "eyelash", "napa": "navel",
+    "vyötärö": "waist", "kyynärpää": "elbow", "ranne": "wrist", "kämmen": "palm",
+    "lantio": "pelvis", "reisi": "thigh", "pohje": "calf", "nilkka": "ankle", "kantapää": "heel",
+    "pikkurilli": "pinky finger", "nimetön": "ring finger", "keskisormi": "middle finger",
+    "etusormi": "index finger", "peukalo": "thumb", "isovarvas": "big toe", "kantaluu": "heel bone",
+    "nikama": "vertebra", "kylkiluu": "rib", "leukaluu": "jawbone", "aivonystyrä": "brain cell",
+    "karva": "hair/fur (single)", "pisama": "freckle", "luomi": "mole/birthmark", "arpi": "scar",
+
+    # --- HOUSE & OBJECTS (Countable) ---
+    "talo": "house", "koti": "home", "asunto": "apartment", "huone": "room", "keittiö": "kitchen",
+    "kylpyhuone": "bathroom", "makuuhuone": "bedroom", "olohuone": "living room", "eteinen": "hall",
+    "parveke": "balcony", "piha": "yard", "ovi": "door", "ikkuna": "window", "seinä": "wall",
+    "katto": "roof", "lattia": "floor", "porras": "stair", "lukko": "lock", "avain": "key",
+    "pöytä": "table", "tuoli": "chair", "sänky": "bed", "sohva": "sofa", "kaappi": "cabinet",
+    "hylly": "shelf", "lamppu": "lamp", "matto": "carpet", "verho": "curtain", "peili": "mirror",
+    "taulu": "picture", "kello": "clock", "radio": "radio", "televisio": "television",
+    "tietokone": "computer", "puhelin": "telephone", "kone": "machine", "uuni": "oven",
+    "hella": "stove", "allas": "basin", "lautanen": "plate", "kulho": "bowl", "muki": "mug",
+    "kuppi": "cup", "veitsi": "knife", "haarukka": "fork", "lusikka": "spoon", 
+    "pannu": "pan", "astianpesukone": "dishwasher", "pyykinpesukone": "washing machine",
+    "pakastin": "freezer", "mikroaaltouuni": "microwave", "leivänpaahdin": "toaster",
+    "vedenkeitin": "kettle", "tehosekoitin": "blender", "vatkain": "mixer", "kahvinkeitin": "coffee maker",
+    "imuri": "vacuum cleaner", "laatikko": "drawer", "tiskiallas": "sink",
+    "hana": "faucet", "roskakori": "trash can", "tiskiharja": "dish brush", "sieni": "sponge",
+    "liina": "cloth", "tyyny": "pillow", "peitto": "blanket", "lakana": "sheet", "pyyhe": "towel",
+    "henkari": "hanger", "kampa": "comb", "hammasharja": "toothbrush", "vasara": "hammer",
+    "saha": "saw", "naula": "nail", "ruuvi": "screw",
+    "ämpäri": "bucket", "harja": "brush", "luuta": "broom", "lapio": "shovel", "akku": "battery",
+    "johto": "cord", "pistorasia": "socket", "sytytin": "lighter", "kynttilä": "candle",
+    "taskulamppu": "flashlight", "porakone": "drill", "pultti": "bolt",
+    "jakkara": "stool", "nojatuoli": "armchair", "kirjahylly": "bookshelf", "lipasto": "chest of drawers",
+    "yöpöytä": "bedside table", "vaatekaappi": "wardrobe", "kynnys": "threshold", "kahva": "handle",
+    "sarana": "hinge", "patteri": "radiator/battery", "pistorasia": "power outlet", "jatkojohto": "extension cord",
+    "sulake": "fuse", "hehkulamppu": "light bulb", "varjostin": "lampshade", "vaasi": "vase",
+    "ruukku": "pot (plants)", "tarjotin": "tray", "pannunalunen": "trivet", "patakinnas": "oven mitt",
+    "esiliina": "apron", "leikkuulauta": "cutting board", "raastin": "grater", "siivilä": "strainer",
+    "kuorimaveitsi": "peeler", "perunasurvin": "potato masher", "vispilä": "whisk", "kaulin": "rolling pin",
+
+    # --- TRANSPORT & CITY (Countable) ---
+    "auto": "car", "bussi": "bus", "juna": "train", "lentokone": "airplane", "laiva": "ship",
+    "vene": "boat", "pyörä": "bicycle", "moottoripyörä": "motorcycle", "tie": "road",
+    "katu": "street", "polku": "path", "silta": "bridge", "tunneli": "tunnel", "asema": "station",
+    "satama": "harbor", "tori": "market", "puisto": "park", "kaupunki": "city", "kylä": "village",
+    "keskusta": "center", "kauppa": "shop", "pankki": "bank", "sairaala": "hospital",
+    "koulu": "school", "kirkko": "church", "tehdas": "factory", "hotelli": "hotel",
+    "ravintola": "restaurant", "kahvila": "cafe", "museo": "museum", "kirjasto": "library",
+    "teatteri": "theater", "apteekki": "pharmacy", "lentokenttä": "airport", "laituri": "platform",
+    "kiitotie": "runway", "opas": "guide", "kartta": "map", "suunta": "direction",
+    "rekka": "truck", "paku": "van", "traktori": "tractor", "mopo": "moped", "ratikka": "tram",
+    "metro": "subway train", "helikopteri": "helicopter", "purjevene": "sailboat", "soutuvene": "rowboat",
+    "liikennemerkki": "traffic sign", "liikennevalo": "traffic light", "suojatie": "crosswalk",
+    "pysäkki": "stop", "parkkipaikka": "parking space", "autotalli": "garage", "pilvenpiirtäjä": "skyscraper",
+    "mökki": "cottage", "talli": "stable", "navetta": "cowshed", "lato": "barn", "aita": "fence",
+    "portti": "gate", "penkki": "bench", "patsas": "statue", "suihkulähde": "fountain",
+
+    # --- FOOD & INGREDIENTS (Countable) ---
+    "makkara": "sausage", "peruna": "potato", "vihannes": "vegetable", "hedelmä": "fruit",
+    "omena": "apple", "banaani": "banana", "sipuli": "onion", "valkosipuli": "garlic",
+    "porkkana": "carrot", "kurkku": "cucumber", "tomaatti": "tomato", "paprika": "bell pepper",
+    "salaatti": "lettuce (head)", "kaali": "cabbage", "herne": "pea", "papu": "bean",
+    "maissi": "corn (cob)", "päärynä": "pear", "luumu": "plum", "viinirypäle": "grape",
+    "mansikka": "strawberry", "mustikka": "blueberry", "vadelma": "raspberry", "sitruuna": "lemon", "siemen": "seed", "leivonnainen": "pastry",
+    "kakku": "cake", "keksi": "cookie", "leipä": "loaf of bread", "sämpylä": "bread roll",
+    "piirakka": "pie", "munkki": "donut", "pulla": "sweet bun", "voileipä": "sandwich",
+    "hampurilainen": "hamburger", "pizza": "pizza", "kananmuna": "egg", "lihapulla": "meatball",
+    "nakki": "frankfurter", "pihvi": "steak", "kyljys": "chop", "koipi": "drumstick",
+    "filee": "fillet", "katkarapu": "shrimp", "simpukka": "mussel", "oliivi": "olive",
+    "kapris": "caper", "sieni": "mushroom", "retiisi": "radish", "parsa": "asparagus",
+    "kukkakaali": "cauliflower", "parsakaali": "broccoli", "munakoiso": "eggplant", "kesäkurpitsa": "zucchini",
+
+    # --- MEDIA, OFFICE & TOOLS (Countable) ---
+    "opiskelija": "student", "opettaja": "teacher", "rehtori": "principal", "luokka": "class",
+    "kurssi": "course", "koe": "test", "arvosana": "grade", "kynä": "pen",
+    "lyijykynä": "pencil", "pyyhekumi": "eraser", "vihko": "notebook",
+    "kirja": "book", "sanakirja": "dictionary", "tussi": "marker", "liitu": "chalk",
+    "ammatti": "profession", "kokous": "meeting", "sopimus": "contract", "asiakas": "customer",
+    "pomo": "boss", "työpaikka": "workplace", "yritys": "company", "sanomalehti": "newspaper",
+    "aikakauslehti": "magazine", "mainos": "advertisement", "näyttö": "monitor",
+    "näppäimistö": "keyboard", "hiiri": "mouse", "tulostin": "printer", "laturi": "charger",
+    "kaapeli": "cable", "kaiutin": "speaker", "kaukosäädin": "remote control", "sovellus": "application",
+    "tiedosto": "file", "kansio": "folder", "salasana": "password", "viesti": "message",
+    "mittanauha": "tape measure", "porakone": "drill", "todistus": "certificate", "tutkinto": "degree",
+    "yliopisto": "university", "lasku": "bill", "kuitti": "receipt", "allekirjoitus": "signature",
+    "vankila": "prison", "nitoja": "stapler", "klemmari": "paperclip", "teippirulla": "roll of tape", "kirjekuori": "envelope", "postimerkki": "stamp",
+    "kortti": "card", "kalenteri": "calendar", "muistilehtiö": "notepad", "kansio": "folder",
+    "piirustus": "drawing", "valokuva": "photograph", "maalaus": "painting", "veistos": "sculpture",
+    "kamera": "camera", "objektiivi": "lens", "jalusta": "tripod", "mikrofoni": "microphone",
+    "kuuloke": "headphone", "levy": "disc/record", "muistitikku": "USB drive", "reititin": "router",
+
+    # --- TIME & ABSTRACT (Countable only) ---
+    "sekunti": "second", "minuutti": "minute", "tunti": "hour", "päivä": "day", "viikko": "week",
+    "kuukausi": "month", "vuosi": "year", "vuosisata": "century", "aamu": "morning",
+    "ilta": "evening", "yö": "night", "maanantai": "Monday", "tiistai": "Tuesday",
     "keskiviikko": "Wednesday", "torstai": "Thursday", "perjantai": "Friday", "lauantai": "Saturday",
-    "sunnuntai": "Sunday", "kevät": "spring", "kesä": "summer", "syksy": "autumn", "talvi": "winter",
-    "asia": "thing", "sana": "word", "nimi": "name", "numero": "number", "väri": "color",
-    "ääni": "sound", "valo": "light", "elämä": "life", "onni": "happiness", "rakkaus": "love",
-    "työ": "work", "raha": "money", "ongelma": "problem", "vastaus": "answer", "kysymys": "question",
+    "sunnuntai": "Sunday", "asia": "thing", "sana": "word", "nimi": "name", "numero": "number",
+    "ongelma": "problem", "vastaus": "answer", "kysymys": "question", "muisto": "memory",
+    "uni": "dream", "ajatus": "thought", "liike": "movement", "matka": "journey",
+    "peli": "game", "voitto": "victory", "häviö": "loss", "muoto": "shape",
+    "tauko": "break", "hetki": "moment", "tapahtuma": "event", "juhla": "party/celebration",
+    "kokous": "meeting", "esitys": "performance", "näyttely": "exhibition", "konsertti": "concert",
+    "elokuva": "movie", "sarja": "series", "jakso": "episode", "luku": "chapter",
+    "sivu": "page", "rivi": "line", "merkki": "character/sign", "virhe": "mistake",
+    "sääntö": "rule", "laki": "law", "oikeus": "right (legal)", "velvollisuus": "duty",
+    "tehtävä": "task", "projekti": "project", "suunnitelma": "plan", "idea": "idea",
+    "unelma": "dream (aspiration)", "toive": "wish", "pelko": "fear",
+    "salaisuus": "secret", "vitsi": "joke", "tarina": "story", "runo": "poem",
+    "laulu": "song", "nuotti": "note", "sointu": "chord", "rytmi": "rhythm",
+
+    # --- SPORTS & HOBBIES (Countable) ---
+    "pallo": "ball", "maila": "racket/bat/stick", "verkko": "net", "maali": "goal",
+    "kypärä": "helmet", "suksi": "ski", "sauva": "pole", "luistin": "skate",
+    "potkulauta": "scooter", "rullalauta": "skateboard", "pumppu": "pump", "venttiili": "valve",
+    "mitali": "medal", "pokaali": "trophy", "rata": "track", "kenttä": "field",
+    "allas": "pool", "hyppylauta": "diving board", "trampoliini": "trampoline", "keila": "bowling pin",
+    "noppa": "die (dice)", "nappula": "game piece/button", "korttipakka": "deck of cards",
+    "pelilauta": "game board", "palapeli": "jigsaw puzzle", "nukke": "doll", "pehmolelu": "plush toy",
+    "pienoismalli": "scale model", "soitin": "instrument", "kitara": "guitar", "piano": "piano",
+    "viulu": "violin", "rumpu": "drum", "huilu": "flute", "trumpetti": "trumpet",
+    "sähkökitara": "electric guitar", "basso": "bass", "syntetisaattori": "synthesizer",
+    "vahvistin": "amplifier", "kaiutin": "speaker", "nuottiteline": "music stand",
+
+    # --- PROFESSIONS (Countable) ---
+    "lääkäri": "doctor", "hoitaja": "nurse", "poliisi": "police officer", "palomies": "firefighter",
+    "sotilas": "soldier", "lentäjä": "pilot", "kapteeni": "captain", "kuljettaja": "driver",
+    "kokki": "cook", "tarjoilija": "waiter", "myyjä": "salesperson", "siivooja": "cleaner",
+    "insinööri": "engineer", "arkkitehti": "architect", "ohjelmoija": "programmer",
+    "taitaja": "master/artisan", "taiteilija": "artist", "muusikko": "musician",
+    "näyttelijä": "actor", "ohjaaja": "director", "toimittaja": "journalist",
+    "kirjailija": "author", "runoilija": "poet", "tutkija": "researcher",
+    "tiedemies": "scientist", "lakimies": "lawyer", "tuomari": "judge",
+    "pappi": "priest", "piispa": "bishop", "kuningas": "king", "kuningatar": "queen",
+    "presidentti": "president", "ministeri": "minister", "poliitikko": "politician",
+    "edustaja": "representative", "johtaja": "manager/leader", "työntekijä": "employee",
+    "harjoittelija": "intern", "asiantuntija": "expert", "neuvonantaja": "advisor",
+    "mekaanikko": "mechanic", "sähköasentaja": "electrician", "putkiasentaja": "plumber",
+    "muurari": "mason", "puuseppä": "carpenter", "leipuri": "baker", "parturi": "barber",
+    "kampaaja": "hairdresser", "kosmetologi": "cosmetologist", "valokuvaaja": "photographer",
+
+    # --- TECHNICAL & INDUSTRIAL (Countable) ---
+    "pumppu": "pump", "moottori": "motor", "turbiini": "turbine", "generaattori": "generator",
+    "muuntaja": "transformer", "venttiili": "valve", "putki": "pipe", "johto": "wire/line",
+    "kaapeli": "cable", "kytkin": "switch", "anturi": "sensor", "mittari": "meter/gauge",
+    "robotti": "robot", "siru": "chip", "prosessori": "processor", "kovalevy": "hard drive",
+    "virtalähde": "power supply", "jäähdytin": "cooler", "tuuletin": "fan", "suodatin": "filter",
+    "tiiviste": "seal/gasket", "laakeri": "bearing", "hammaspyörä": "gear", "hihna": "belt (machine)",
+    "ketju": "chain", "vipu": "lever", "jousi": "spring", "pultti": "bolt", "prikka": "washer", "niitti": "rivet", "hitsaussauma": "weld seam", "teline": "rack/scaffold",
+    "nosturi": "crane", "trukin": "forklift", "kontti": "container", "lava": "pallet",
+
+    # ... (Entries 1000-1100 continued)
+    "mutteriavain": "wrench", "pora": "drill bit", "hiomakone": "sander", "sirkkeli": "circular saw",
+    "höylä": "plane (tool)", "taltta": "chisel", "viila": "file (tool)",
+     "sorkkarauta": "crowbar", "lapio": "shovel", "hanko": "pitchfork", "viikate": "scythe", "sirppi": "sickle",
+    "kottikärry": "wheelbarrow", 
+    "generaattori": "generator", "kompressori": "compressor",
+    "sorvi": "lathe", "jyrsin": "milling machine",
+    "painepesuri": "pressure washer", "ruohonleikkuri": "lawnmower",
+    "lehtipuhallin": "leaf blower", "lumilinko": "snowblower",
+    "aggregaatti": "aggregate", "muuntaja": "transformer",
+    "rele": "relay", "vastus": "resistor", "kondensaattori": "capacitor",
+    "diodi": "diode", "transistori": "transistor", "piirilevy": "circuit board",
+    "antenni": "antenna", "satelliitti": "satellite", "kaukoputki": "telescope",
+    "mikroskooppi": "microscope", "laboratoriotakki": "lab coat", "koeputki": "test tube",
+    "pipetti": "pipette", "vaaka": "scale", "lämpömittari": "thermometer",
+    "verenpainemittari": "blood pressure monitor", "stetoskooppi": "stethoscope",
+    "ruisku": "syringe", "laastari": "band-aid", "sideharsorulla": "gauze roll",
+    "pyörätuoli": "wheelchair", "kipsi": "cast", "tekohammas": "denture", "kuulolaite": "hearing aid",
+    "silmälasinsanka": "glasses frame", "piilolinssi": "contact lens",
+    "hammasrauta": "braces", "tutti": "pacifier", "vaippa": "diaper",
+    "vaunu": "carriage", "ratas": "cog/wheel", "keinu": "swing", "liukumäki": "slide",
+    "hiekkalaatikko": "sandbox", "kiipeilyteline": "climbing frame",
+    "lippu": "flag", "viiri": "pennant", "kilpi": "shield/sign", "miekka": "sword",
+    "jousi": "bow", "nuoli": "arrow", "keihäs": "spear", "kanuuna": "cannon",
+    "panssarivaunu": "tank", "sukellusvene": "submarine", "laskuvarjo": "parachute",
+    "kuumailmapallo": "hot air balloon", "avaruusalus": "spaceship", "raketti": "rocket",
+    "komeetta": "comet", "asteroidi": "asteroid",
+    "galaksi": "galaxy", "sumu": "nebula", "tähdenlento": "shooting star"
 }
 
 def get_first_vowel_in_long_word(word):
@@ -119,7 +476,7 @@ def syllables_decider(word):
 
 
 def partitive_sg(word:str) -> str:
-    exceptions = {"kuu":"kuuta", "kokous":"kokousta", "vastaus":"vastausta","kuvaus":"kuvausta", "esitys":"esitystä", "ajatus":"ajatusta", "seuraus":"seurausta", "tulos":"tulosta", "kysymys":"kysymystä", "kaappi":"kaappia","penkki":"penkkiä","maalaus":"maalausta","koti":"kotia","historia":"historiaa", "musiikki":"musiikkia","laki":"lakia","appelsiini":"appelsiinia", "suurin":"suurimpaa", "vesi":"vettä", "kieli":"kieltä","kansi":"kantta", "kausi":"kautta", "viini": "viiniä","vastaus":"vastausta",
+    exceptions = {"krokotiili":"krokotiilia","arkkitehti":"arkkitehtia","putous":"putousta","kuu":"kuuta", "kokous":"kokousta", "vastaus":"vastausta","kuvaus":"kuvausta", "esitys":"esitystä", "ajatus":"ajatusta", "seuraus":"seurausta", "tulos":"tulosta", "kysymys":"kysymystä", "kaappi":"kaappia","penkki":"penkkiä","maalaus":"maalausta","koti":"kotia","historia":"historiaa", "musiikki":"musiikkia","laki":"lakia","appelsiini":"appelsiinia", "suurin":"suurimpaa", "vesi":"vettä", "kieli":"kieltä","kansi":"kantta", "kausi":"kautta", "viini": "viiniä","vastaus":"vastausta",
                   "jälsi": "jälttä", "virsi":"virttä", "yksiö":"yksiötä","työhuone":"työhuonetta","ilmoitus":"ilmoitusta", "päätös":"päätöstä","muutos":"muutosta",
                   "veitsi": "veistä", "suuri":"suurta", "suurin":"suurimpaa","mies":"miestä",
                     "seitsemän":"seitsemää", "vasen":"vasempaa", "kivi":"kiveä", "käsi":"kättä", "veli":"veljeä", "lumi":"lunta",
@@ -149,75 +506,153 @@ def partitive_sg(word:str) -> str:
     #vesi -> vetta, exceptions
     #if len(word) >= len(min(exceptions, key=len)):
     for item in exceptions:
-        if item in word[-len(item):]:
+        if len(item) >= 4 and len(word) > 7 and item in word[-len(item):]:
             word = word[:-len(item)] + exceptions[item]
             return [word]
-    
+        else:
+            if item == word:
+                word = exceptions[item]
+                return [word]
+            
     #I to E, need to work on 
     for item in i_to_e:
-        if item == word[-len(item):]:
-            # usi -> usta
-            if word[-3:] == "usi":
-                if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
-                    word = word[:-1] +"tä"
-                else:
-                    word = word[:-1] + "ta" #tä
-                return [word]
+        if len(word) > 7 and len(item) >= 4:
+            if item == word[-len(item):]:
+                # usi -> usta
+                if word[-3:] == "usi":
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] +"tä"
+                    else:
+                        word = word[:-1] + "ta" #tä
+                    return [word]
 
-            # ni -> nta/ntä
-            elif word[-2:] == "ni":
-                if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
-                    word = word[:-1] + "tä"
-                else:
-                    word = word[:-1] +"ta" 
-                return [word]
+                # ni -> nta/ntä
+                elif word[-2:] == "ni":
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] + "tä"
+                    else:
+                        word = word[:-1] +"ta" 
+                    return [word]
 
-            # ri -> rtä
-            elif word[-2:] == "ri":
-                if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
-                    word = word[:-1] +"tä"
-                else:
-                    word = word[:-1] +"ta" #tä
-                return [word]
+                # ri -> rtä
+                elif word[-2:] == "ri":
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] +"tä"
+                    else:
+                        word = word[:-1] +"ta" #tä
+                    return [word]
 
-            # hi -> hta 
-            elif word[-2:] == "hi":            
-                if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
-                    word = word[:-1] +"tä"
-                else:
-                    word = word[:-1] +"ta" #tä
-                return [word]
-            #siili, kaali
-            elif word[-4:] in ("iili", "aali"):
-                if "a" in word[-4:]:
-                    word += "a"
-                else:
-                    word += "ä"
-                return [word]
-            # li -> ltä
-            elif word[-2:] == "li":
-                if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
-                    word = word[:-1] +"tä"
-                else:
-                    word = word[:-1] +"ta" #tä
-                return [word]
+                # hi -> hta 
+                elif word[-2:] == "hi":            
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] +"tä"
+                    else:
+                        word = word[:-1] +"ta" #tä
+                    return [word]
+                
+                #siili, kaali
+                elif word[-4:] in ("iili", "aali"):
+                    if "a" in word[-4:]:
+                        word += "a"
+                    else:
+                        word += "ä"
+                    return [word]
+                # li -> ltä
+                elif word[-2:] == "li":
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] +"tä"
+                    else:
+                        word = word[:-1] +"ta" #tä
+                    return [word]
 
-            # si -> ttä
-            elif word[-2:] == "si":
-                if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
-                    word = word[:-2] +"ttä"
-                else:
-                    word = word[:-2] +"tta" # checknout to tä
-                return [word]
+                # si -> ttä
+                elif word[-2:] == "si":
+                    if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-2] +"ttä"
+                    else:
+                        word = word[:-2] +"tta" # checknout to tä
+                    return [word]
 
-            #i -> e + a/ä
-            else:
-                if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-5:] for vowel in neutralising_vowels):
-                    word = word[:-1] + "eä"
+                #i -> e + a/ä
                 else:
-                    word = word[:-1] + "ea"
-                return [word]
+                    if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-5:] for vowel in neutralising_vowels):
+                        word = word[:-1] + "eä"
+                    else:
+                        word = word[:-1] + "ea"
+                    return [word]
+        else:
+            if item == word:
+                # usi -> usta
+                if word[-3:] == "usi":
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] +"tä"
+                    else:
+                        word = word[:-1] + "ta" #tä
+                    return [word]
 
+                # ni -> nta/ntä
+                elif word[-2:] == "ni":
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] + "tä"
+                    else:
+                        word = word[:-1] +"ta" 
+                    return [word]
+
+                # ri -> rtä
+                elif word[-2:] == "ri":
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] +"tä"
+                    else:
+                        word = word[:-1] +"ta" #tä
+                    return [word]
+                
+                #hanhi -> hanhea
+                elif word[-3:] == "nhi":            
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] +"eä"
+                    else:
+                        word = word[:-1] +"ea" #tä      
+                    
+                    return [word]
+                # hi -> hta 
+                elif word[-2:] == "hi":            
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] +"tä"
+                    else:
+                        word = word[:-1] +"ta" #tä
+                    return [word]
+                
+                #siili, kaali
+                elif word[-4:] in ("iili", "aali"):
+                    if "a" in word[-4:]:
+                        word += "a"
+                    else:
+                        word += "ä"
+                    return [word]
+                
+                # li -> ltä
+                elif word[-2:] == "li":
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-1] +"tä"
+                    else:
+                        word = word[:-1] +"ta" #tä
+                    return [word]
+
+                # si -> ttä
+                elif word[-2:] == "si":
+                    if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+                        word = word[:-2] +"ttä"
+                    else:
+                        word = word[:-2] +"tta" # checknout to tä
+                    return [word]
+
+                #i -> e + a/ä
+                else:
+                    if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-5:] for vowel in neutralising_vowels):
+                        word = word[:-1] + "eä"
+                    else:
+                        word = word[:-1] + "ea"
+                    return [word]
 
         
 
@@ -263,12 +698,12 @@ def partitive_sg(word:str) -> str:
 
 
     #RAKKAUS -> rakkautta
-    elif word[-4:] in ("eus", "uus", "kaus","ous"):
+    elif word[-4:] in ("kaus"):
         word = word[:-1] + "tta"
         return [word]
     #All thanks to my beautiful girlfriend Maria that helped me with this program <3
     #avaruus and kauneus
-    elif word[-3:] in ("eus", "uus","ous"):
+    elif word[-3:] in ("eus", "uus","ous","aus"):
         word = word[:-1] + "tta"
         return [word]
 
@@ -292,7 +727,7 @@ def partitive_sg(word:str) -> str:
 
     #E vene -> venettä, laite -> laitetta
     elif word[-1] == "e" and word[-2:] != "ie":
-        if any(vowel in word[-6:] for vowel in changing_vowels) or any(vowel in word[-6:] for vowel in neutral_vowels) and not any(vowel in word[-6:] for vowel in neutralising_vowels):
+        if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-6:] for vowel in neutral_vowels) and not any(vowel in word[-6:] for vowel in neutralising_vowels):
             word += "ttä"
         else: word += "tta"
         return [word]
@@ -372,14 +807,17 @@ def partitive_pl(word) -> str:
     neutralising_vowels = "aou"
     changing_vowels = "äyö"
     syllables = syllables_decider(word)
-    #si/ us might be exception - file
 
-    #ravintola
-#All thanks to my beautiful girlfriend Maria that helped me with this program <3    
+  
     #koe, rikas, mies, puhelin
-    #Leimu contribution# - näppäin <3 saippuakauppias
-    exceptions = {"hana":"hanoja", "kaappi":"kaappeja", "maailma":"maailmoja", "keskusta":"keskustoja", "sana":"sanoja","etelä":"eteliä","jänis":"jäniksiä","viikko":"viikkoja","kiuas":"kiukaita","suola":"suoloja","veli":"veljiä","ihana":"ihania","näppäin":"näppäimiä","muna":"munia","appelsiini":"appelsiineja", "voi":"voita","hidas":"hitaita", "laite":"laitteita","kausi": "kausia", "taide":"taiteita","laki":"lakeja","pullo":"pulloja","vuoro":"vuoroja","hana":"hanoja","verkko":"verkkoja","lahje":"lahkeita","kirkko":"kirkkoja","omena":"omenoita","ien":"ikeniä","koe":"kokeita", "rikas":"rikkaita", "mies":"miehiä", "puhelin":"puhelimia", "tytär":"tyttäriä", "kannel":"kanteleita", "sävel":"säveliä", "kyynel":"kyyneleitä", "sammal":"sammaleita", "taival":"taipaleita", "askel":"askeleita", "nivel":"niveliä","ommel":"ompeleita", "tanner":"tantereita", "manner":"mantereita", "seitsemän":"seitsemiä", "jääkiekko":"jääkiekkoja", "matala":"matalia","ihana":"ihania", "ahkera":"ahkeria", "sako":"sakkoja", "musiikki":"musiikkeja"}
+    #Leimu contribution# - näppäin <3 saippuakauppias 
     
+    # many of the exceptions are actually beacuse of compaund words - > if you have time you
+    # can redo them and put there another categhory - frequent compound components, so the program just computes them as single words
+    exceptions = {"pyörä":"pyöriä","karva":"karvoja","venttiili":"venttiilejä","sauma":"saumoja","linssi":"linssejä","pikkurilli":"pikkurillejä","leijona":"leijonia","sinnappi":"sinnappeja","siili":"siilejä", "kala":"kaloja","konna":"konnia","krokotiili":"krokotiileja","papukaija":"papukaijoja","nitoja":"nitojia", "paprika":"paprikoita","kynä":"kyniä", "vene":"veneitä", "rulla":"rullia","jäkälä": "jäkäliä", "peli":"pelejä", "salama":"salamoita", "pulla":"pullia","kukka":"kukkia", "kytkin":"kytkimiä","idea":"ideoita","tohveli":"tohveleita","liina":"liinoja", "ruis":"rukiita","hana":"hanoja", "kaappi":"kaappeja", "maailma":"maailmoja", "keskusta":"keskustoja", "sana":"sanoja","etelä":"eteliä","jänis":"jäniksiä","viikko":"viikkoja","kiuas":"kiukaita","suola":"suoloja","veli":"veljiä","ihana":"ihania","näppäin":"näppäimiä","muna":"munia","appelsiini":"appelsiineja", "voi":"voita","hidas":"hitaita", "laite":"laitteita","kausi": "kausia", "taide":"taiteita","laki":"lakeja","pullo":"pulloja","vuoro":"vuoroja","hana":"hanoja","verkko":"verkkoja","lahje":"lahkeita","kirkko":"kirkkoja","omena":"omenoita","ien":"ikeniä","koe":"kokeita", "rikas":"rikkaita", "mies":"miehiä", "puhelin":"puhelimia", "tytär":"tyttäriä", "kannel":"kanteleita", "sävel":"säveliä", "kyynel":"kyyneleitä", "taival":"taipaleita", "askel":"askeleita", "nivel":"niveliä","ommel":"ompeleita", "tanner":"tantereita", "manner":"mantereita", "seitsemän":"seitsemiä", "matala":"matalia","ihana":"ihania", "ahkera":"ahkeria", "sako":"sakkoja"}
+    
+    vocal_exceptions = ["konsertti", "syntetisaattori", "arkkitehti", "objektiivi", "apteekki", "satelliitti", "lämpömittari"]
+
     i_to_e = ["alpi","uni", "appi","arki","arpi","hanhi","hanki","happi","hapsi","hauki","heisi","helmi","henki","hetki","hiili","hiiri","hiisi","hiki",
 "hirsi","hirvi","huoli","huuli","impi","joki","jouhi","jousi","juoni","juuri","jälki","jälsi","järki","järvi","Jääski","kaali","kaari","kaihi","kaikki","kaksi",
 "kampi","kanki","kansi","karhi","kaski","kieli","kiiski","kilpi","kirsi","kivi","koipi","korpi","korsi","koski","kuori","kurki","kusi",
@@ -393,7 +831,12 @@ def partitive_pl(word) -> str:
 "tähti","täysi","uksi","uuhi","uusi","varsi","veitsi","veli","veri","vesi","vieri","viiksi","viisi","virpi",
 "virsi","vuohi","Vuoksi","vuori","vuosi","vyyhti","väki","yksi","ääni","ääri"]
 
+    if word[-5:] == "kaali" and len(word) >= 7:
+        return [word[:-1] + "eja", word[:-1] + "eita"]
 
+    elif word[-7:] == "kaapeli" and len(word) >= 7:
+        return [word[:-1] + "eja", word[:-1] + "eita"]
+    
     for item in exceptions:
         if len(item) > 3 and item in word[-len(item):]:
             word = word[:-len(item)] + exceptions[item]
@@ -404,7 +847,7 @@ def partitive_pl(word) -> str:
                 return [word]
 
     for item in i_to_e:
-        if len(word) > 5:
+        if len(word) > 5 and len(item) >= 4:
             if item == word[-len(item):]:
                 if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:]  for vowel in neutral_vowels) and not any(vowel in word[-4:] for vowel in neutralising_vowels):
                     word += "ä"
@@ -413,6 +856,9 @@ def partitive_pl(word) -> str:
                 return [word]
         else:
             if item == word:
+                if word[-4:] in ("aali"):
+                    return [word[:-1] + "eja"]
+
                 if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:]  for vowel in neutral_vowels) and not any(vowel in word[-4:] for vowel in neutralising_vowels):
                     word += "ä"
                 else:
@@ -424,25 +870,62 @@ def partitive_pl(word) -> str:
     if word[-3:] in ("kka","kko") and syllables >= 3 and not any(vowel in word for vowel in changing_vowels):
         return [word[:-2] + "oita", word[:-1] + "oja"]
 
+    elif word[-4:] in ("usta", "uusa", "itsa", "tera") and syllables >= 3:
+        return [word[:-1] + "oita", word[:-1] + "oja"]
 
-    elif word[-3:] == "hai":
-        word += "ta"
+    elif word[-3:] == "yhe":
+        return [word[:-1] + "keitä"]
+    
+    #kapris - > kapriksia
+    elif word[-3:] == "ris":
+        return [word[:-1] + "ksia"]
+    
+    
+    elif word[-2:] == "al":
+        return [word + "ia", word + "eita"]
+    
+    
+    elif word[-4:] == "oija" and syllables >= 3:
+        word = word[:-1] + "ia"
+        return [word]
+    
+    #opiskelija 
+    elif word[-3:] == "ija" and syllables >= 3:
+        word = word[:-1] + "oita"
         return [word]
 
-
-    
-    elif word[-3:] in ("yrä") and syllables == 3:
+    elif word[-3:] == "ijä" and syllables >= 3:
         word = word[:-1] + "öitä"
         return [word]
 
+    
+    elif word[-3:] in ("hai", "tai"):
+        word += "ta"
+        return [word]
+    #olki
+    elif word[-3:] in ("lki"):
+        word += "a"
+        return [word]
+    
     elif word[-3:] in ("ävä", "evä", "ärä") and syllables == 3:
         word = word[:-1] + "iä"
         return [word]
     
-    elif word[-2:] in ("lä", "rä", "nä", "iä") and syllables >= 3 and not any(vowel in word for vowel in neutralising_vowels):
+    elif word[-2:] in ("lä", "rä", "nä", "iä") and syllables >= 3:
         word = word[:-1] + "öitä"
         return [word]
-        
+
+    #korkea
+    elif word[-2:] == "ea" and syllables >= 3:
+        word = word[:-1] + "ita"
+        return [word]
+    
+
+    elif word[-2:] == "eä":
+        word = word[:-1] + "itä"
+        return [word]
+    
+
     elif word[-1] == "ä" and word[-2:] != "ää":
         word = word[:-1] + "iä"
         return [word]
@@ -484,7 +967,7 @@ def partitive_pl(word) -> str:
 
 
     #mukava, matala
-    elif word[-3:] in ("ala", "ava", "isa", "era") and syllables == 3 and word[-4:] != "aala":
+    elif word[-3:] in ("ala", "ava", "isa", "era") and syllables == 3 and word[-4:] != "aala" and word[-4:] != "mera":
         word = word[:-1] + "ia"
         return [word]
 
@@ -493,27 +976,6 @@ def partitive_pl(word) -> str:
     elif word[-2:] in ("la", "ra", "na", "ia") and syllables >= 3 and not any(vowel in word for vowel in changing_vowels):
         word = word[:-1] + "oita"
         return [word]
-
-    #opiskelija 
-    elif word[-3:] == "ija" and syllables >= 3:
-        word = word[:-1] + "oita"
-        return [word]
-
-    elif word[-3:] == "ijä" and syllables >= 3:
-        word = word[:-1] + "äitä"
-        return [word]
-    
-
-    #korkea
-    elif word[-2:] == "ea" and syllables >= 3:
-        word = word[:-1] + "ita"
-        return [word]
-    
-
-    elif word[-2:] == "eä" and syllables >= 3:
-        word = word[:-1] + "itä"
-        return [word]
-    
 
         #vadelma, majava
     elif word[-2:] in ("ma", "va") and syllables >= 3:
@@ -668,12 +1130,29 @@ def partitive_pl(word) -> str:
         
     #tunne -> tunteita 
     elif word[-3:] == "nne":
-        word = word[:-2] + "teita"
+        if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-5:] for vowel in neutralising_vowels):        
+            word = word[:-2] + "teitä"
+        else:
+            word = word[:-2] + "teita"
+        return [word]
+
+    elif word[-3:] == "lje":
+        if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-5:] for vowel in neutralising_vowels):        
+            word = word[:-2] + "keitä"
+        else:
+            word = word[:-2] + "keita"
+        return [word]
+
+    elif word[-3:] == "hje" and word != "ohje":
+        if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-5:] for vowel in neutralising_vowels):        
+            word = word[:-2] + "keitä"
+        else:
+            word = word[:-2] + "keita"
         return [word]
 
     #huone, kone
     elif word[-1] == "e":
-        if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-5:] for vowel in neutralising_vowels):        
+        if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-6:] for vowel in neutralising_vowels):        
             word += "itä"
         else:
             word += "ita"
@@ -682,7 +1161,10 @@ def partitive_pl(word) -> str:
         #All thanks to my beautiful girlfriend Maria that helped me with this program <3            
         #rakkaus might need change to aus
     elif word[-2:] in ("us", "es","os"):
-        word = word[:-1] + "ksia"
+        if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-6:] for vowel in neutralising_vowels):
+            word = word[:-1] + "ksiä"
+        else:
+            word = word[:-1] + "ksia"
         return [word]
 
     elif word[-3:] in ("has"):
@@ -712,22 +1194,55 @@ def partitive_pl(word) -> str:
     elif word[-2:] in ("on","an"):
         word = word[:-2] + "tomia"
         return [word]
-
+    
+    #lehtipuhallin -> lehtipuhaltimia
+    elif word[-4:] in ("llin"):
+        if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+            word = word[:-3] + "timiä"
+        else:
+            word = word[:-3] + "timia"
+        return [word]
+    
     #puhelin
-    elif word[-3:] in ("lin", "ain"):
+    elif word[-3:] in ("lin","ain","sin","vin"):
         if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
             word = word[:-1] + "miä"
         else:
             word = word[:-1] + "mia"
         return [word]
 
-
-    elif word[-3:] == "tin":
+    elif word[-3:] == "din":
+        if any(vowel in word[-7:] for vowel in changing_vowels) or any(vowel in word[-7:] for vowel in neutral_vowels) and not any(vowel in word[-5:] for vowel in neutralising_vowels):
+            word = word[:-3] + "timiä"
+        else: 
+            word = word[:-3] + "timia"
+        return [word]
+    
+   #tulostin 
+    elif word[-4:] == "stin":
         if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+            word = word[:-1] + "miä"
+        else: 
+            word = word[:-1] + "mia"
+        return [word]
+    
+    #tuuletin
+    elif word[-3:] == "tin":
+        if any(vowel in word[-7:] for vowel in changing_vowels) or any(vowel in word[-7:] for vowel in neutral_vowels) and not any(vowel in word[-7:] for vowel in neutralising_vowels):
             word = word[:-2] + "timiä"
         else: 
             word = word[:-2] + "timia"
         return [word]
+    
+    #lämmin
+    elif word[-4:] == "mmin":
+        if any(vowel in word[-7:] for vowel in changing_vowels) or any(vowel in word[-7:] for vowel in neutral_vowels) and not any(vowel in word[-7:] for vowel in neutralising_vowels):
+            word = word[:-3] + "pimiä"
+        else: 
+            word = word[:-2] + "pimia"
+        return [word]
+    
+    
     #sydän
     elif word[-3:] == "dän":
         word = word[:-1] + "miä"  
@@ -774,10 +1289,16 @@ def partitive_pl(word) -> str:
 
     #kaveri
     elif word[-2:] == "ri" and syllables >= 3:
-        return [word[:-1] + "eita", word[:-1] + "eja"]
+        if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+            if word in vocal_exceptions:
+                return [word[:-1] + "eita", word[:-1] + "eja"]
+            else:
+                return [word[:-1] + "eitä", word[:-1] + "ejä"]
+        else:
+            return [word[:-1] + "eita", word[:-1] + "eja"]
 
     elif word[-2:] == "in":
-        if any(vowel in word for vowel in changing_vowels) or any(vowel in word for vowel in neutral_vowels) and not any(vowel in word for vowel in neutralising_vowels):
+        if any(vowel in word[-7:] for vowel in changing_vowels) or any(vowel in word[-7:] for vowel in neutral_vowels) and not any(vowel in word[-6:] for vowel in neutralising_vowels):
             word = word[:-1] + "mpiä"
         else:
             word = word[:-1] + "mpia"
@@ -787,6 +1308,10 @@ def partitive_pl(word) -> str:
     #numero
     elif word[-2:] == "ro" and syllables >= 3:
         return [word + "ita", word + "ja"]
+    
+    #vyötärö
+    elif word[-2:] == "rö" and syllables >= 3:
+        return [word + "itä", word + "jä"]
 
     
     #u, o, ö, y -> + j + a/ä
@@ -804,7 +1329,7 @@ def partitive_pl(word) -> str:
 
     #pankki        
     elif word[-1] == "i" and word not in i_to_e:
-        if any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-8:] for vowel in neutralising_vowels):
+        if (any(vowel in word[-5:] for vowel in changing_vowels) or any(vowel in word[-5:] for vowel in neutral_vowels) and not any(vowel in word[-7:] for vowel in neutralising_vowels)) and word not in vocal_exceptions:
             word = word[:-1] + "ejä"
         else:
             word = word[:-1] + "eja"
@@ -833,6 +1358,12 @@ def partitive_pl(word) -> str:
     elif word[-3:] == "pas":
         word = word[:-2] + "paita"
         return [word]
+    #ratas -> rattaita
+
+    elif word[-3:] == "tas":
+        word = word[:-2] + "taita"
+        return [word]
+
 
     elif word[-4:] == "rras":
         word = word[:-3] + "taita"
@@ -842,12 +1373,20 @@ def partitive_pl(word) -> str:
         word = word[:-3] + "kaita"
         return [word]
 
+    elif word[-4:] == "nnas":
+        word = word[:-3] + "taita"
+        return [word]
+
     elif word[-4:] == "llas":
         word = word[:-3] + "taita"
         return [word]
 
     elif word[-2:] == "as":
         word = word[:-1] + "ita"
+        return [word]
+
+    elif word[-2:] == "äs":
+        word = word[:-1] + "itä"
         return [word]
               
 
