@@ -1261,6 +1261,48 @@ TYPE_COLORS = {
 # ==========================================
 st.set_page_config(page_title="Finnish Verb Master", layout="centered")
 
+st.markdown("""
+<style>
+    /* 1. FLAME ANIMATIONS & STYLING */
+    .flame-wrapper {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px; /* Pulls flame up nicely */
+    }
+
+    .streak-number {
+        position: absolute;
+        top: 65%;
+        left: 55%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: 900;
+        font-size: 1.2rem;
+        z-index: 10;
+        font-family: 'Arial Black', sans-serif;
+    }
+
+    .glow-freeze { filter: drop-shadow(0 0 8px #00d4ff); }
+    .glow-small { filter: drop-shadow(0 0 12px #ff9800); }
+    .glow-big { filter: drop-shadow(0 0 20px #ff4500); }
+
+    /* 2. GAP KILLER - Pulls the text input right up to the Flip Card button */
+    div[data-testid="stTextInput"] {
+        margin-top: -25px !important; 
+    }
+    
+    /* Removes the invisible padding below the button */
+    div.element-container:has(button) {
+        margin-bottom: 0px !important;
+        padding-bottom: 0px !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # CSS to fix the red glow, hide anchors, and stop the layout jumping
 st.markdown("""
 <style>
@@ -1351,6 +1393,18 @@ div.element-container:has(div[style*='❌ Try again']) {
     padding-top: 0px !important;
     padding-bottom: 0px !important;
 }
+div.stButton > button[kind="secondary"] {
+        padding: 10px 25px !important;
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
+        min-height: 45px !important;
+        min-width: 90px !important;
+        border-radius: 10px !important;
+        /* Ensure it stays clickable and on top */
+        position: relative !important;
+        z-index: 1000 !important;
+
+    }
 
 /* Optional: tighten feedback box padding */
 .feedback-box > div {
@@ -1371,6 +1425,8 @@ if "state" not in st.session_state:
         "score": {"correct": 0, "wrong": 0},
         "quiz": [],
         "to_repair": [],
+        "streak": 0,
+        "max_streak": 0,
         "feedback": None,
         "correct_answer": "",
         "input_key_suffix": 0,
@@ -1422,17 +1478,42 @@ def handle_submit():
     verb, tense, pronoun = s["quiz"][s["idx"]]
     correct_ans = get_correct_conjugation(verb, tense, pronoun).lower()
     s["correct_answer"] = correct_ans
-    
+    s["wrong_sound_played"] = False
+    s["correct_sound_played"] = False
     if user_val == correct_ans:
             # Scoring Fix: Only count correct if they didn't miss it first
             if not s["missed_current"]:
                 s["score"]["correct"] += 1
+                s["streak"] += 1
+                if s["streak"] > s["max_streak"]:
+                    s["max_streak"] = s["streak"]
+                if s["streak"] % 5 == 0:
+                    st.markdown("""
+    <style>
+    @keyframes vibrate {
+        0% { transform: translate(0px, 0px); }
+        25% { transform: translate(1px, -1px); }
+        50% { transform: translate(-1px, 1px); }
+        75% { transform: translate(1px, 1px); }
+        100% { transform: translate(0px, 0px); }
+    }
+    .flame {
+        display: inline-block;
+        animation: vibrate 0.2s infinite;
+        font-size: 40px;
+    }
+    </style>
+
+    <div class="flame">🔥</div>
+    """, unsafe_allow_html=True)
+                    
             s["feedback"] = "correct"
     else:
         # Scoring Fix: Increment wrong count ONLY on the first mistake for this word
         if not s["missed_current"]:
             s["score"]["wrong"] += 1
             s["missed_current"] = True
+            s["streak"] = 0
             if (verb, tense, pronoun) not in s["to_repair"]:
                 s["to_repair"].append((verb, tense, pronoun))
         s["feedback"] = "wrong"
@@ -1465,6 +1546,7 @@ def start_quiz(word_source, num, mode):
     """Initializes the quiz state with selected words and settings."""
     # 1. Reset everything for a fresh start
     s["idx"] = 0
+    s["streak"] = 0
     s["score"]["correct"] = 0
     s["score"]["wrong"] = 0
     s["to_repair"] = []
@@ -1562,22 +1644,52 @@ if s["view"] == "menu":
 
 elif s["view"] in ["game"]:
 
-    cols = st.columns([5, 1]) 
-    with cols[1]:
-        if st.button("Quit", use_container_width=True):
-            s["view"] = "menu"
-            st.rerun()
     verb, tense, pronoun = s["quiz"][s["idx"]]
     v_type = type_recognision(verb)
     type_color = TYPE_COLORS.get(v_type.lower(), "#888")
     tense_color = TENSE_COLORS.get(tense, "#000000")
+
+    streak = s.get("streak", 0)
+
+    # 1. Choose the flame color based on the streak
+    if streak >= 10:
+        f_class, col_main, col_inner = "glow-big", "#ff4500", "#ffba08"
+    elif streak >= 5:
+        f_class, col_main, col_inner = "glow-small", "#ff4500", "#e1b648"
+    elif streak >= 3:
+        f_class, col_main, col_inner = "glow-small", "#ff9800", "#ffdb58"
+    else:
+        f_class, col_main, col_inner = "glow-freeze", "#00d4ff", "#a2e9ff"
     
-    # 4th Picture Fix: Using Divs instead of Markdown Headers to avoid anchors
-    st.write(f"""<div style="text-align:center; color:{tense_color}; font-size:4rem; font-weight:800; margin-bottom:0px;">{tense.upper()}</div>""", unsafe_allow_html=True)
+# --- TOP ROW: FLAME (Left) & QUIT (Right) ---
+    col_flame, col_mid, col_quit = st.columns([1, 6, 1])
+
+    with col_flame:
+        st.write(f"""
+            <div class="flame-wrapper {f_class}">
+                <svg viewBox="0 0 100 100" style="width:100%; height:100%;">
+                    <path fill="{col_main}" d="M50,95c22,0,40-18,40-40c0-15-8-28-20-35c2,8,0,18-5,25c-5-15-15-25-15-45c-15,20-25,40-25,60C25,82,36,95,50,95z"/>
+                    <path fill="{col_inner}" d="M50,90c15,0,28-12,28-28c0-10-5-20-13-25c1,5,0,12-3,17c-3-10-10-17-10-30c-10,15-17,28-17,42C35,81,42,90,50,90z" opacity="0.7"/>
+                </svg>
+                <div class="streak-number">{streak}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col_quit:
+        st.markdown("<div style='margin-top: 0px;'></div>", unsafe_allow_html=True)
+        if st.button("Quit", key="quit_btn_game"):
+            s["view"] = "menu"
+            st.rerun()
+
+    # --- MAIN HEADERS ---
+    # margin-top:-60px pulls the words up into the empty middle space
     st.write(f"""
-    <div style="text-align:center; color:{type_color}; font-size:1.5rem; font-weight:bold; margin-bottom:20px;">
-    {v_type.upper()}
-    </div>
+        <div style="text-align:center; color:{tense_color}; font-size:4rem; font-weight:800; margin-top:-20px;">
+            {tense.upper()}
+        </div>
+        <div style="text-align:center; color:{type_color}; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">
+            {v_type.upper()}
+        </div>
     """, unsafe_allow_html=True)
 
     # UI PROGRESS
@@ -1597,6 +1709,7 @@ elif s["view"] in ["game"]:
 
     # CARD UI
     is_flipped = "flipped" if (s["show_english"] or s["show_reveal"]) else ""
+    english_translation = WORDS.get(verb, "Translation missing")
     st.markdown(f"""
     <style>
     .flip-card {{ height: 200px; perspective: 1000px;}}
@@ -1618,7 +1731,7 @@ elif s["view"] in ["game"]:
             <div class="face-back">
                 <div style="color:gray; font-size:0.8rem;">{"CORRECT ANSWER" if s["show_reveal"] else "ENGLISH"}</div>
                 <div style="font-size:3rem; font-weight:bold; color:{c_acc};">
-                    {s["correct_answer"] if s["show_reveal"] else "to live"}
+                    {s["correct_answer"] if s["show_reveal"] else english_translation}
                 </div>
             </div>
         </div>
@@ -1653,11 +1766,19 @@ div[data-baseweb="base-input"]:focus-within {{
     # 2. FEEDBACK BOX (Jump Fix)
     st.markdown('<div class="feedback-box">', unsafe_allow_html=True)
     if s["feedback"] == "wrong" and not s["show_reveal"]:
+        if not s.get("wrong_sound_played"):
+            play_audio("wrong_sound.mp3")
+            s["wrong_sound_played"] = True
+
         st.markdown('<div style="color:black; text-align:center; font-weight:bold; padding:5px; border:1px solid black; border-radius:8px; background:#f9f9f9;">❌ Try again!</div>', unsafe_allow_html=True)
         st.button("Show Answer", on_click=lambda: s.update({"show_reveal": True}), use_container_width=True)
     
     elif s["feedback"] == "correct":
-        st.markdown('<div style="color:#4CAF50; text-align:center; font-weight:bold; padding:10px; border:2px solid #4CAF50; border-radius:8px; background:#f0fff0;">✅ Correct!</div>', unsafe_allow_html=True)
+        if not s.get("correct_sound_played"):
+            play_audio("correct_sound.mp3")
+            s["correct_sound_played"] = True
+
+        st.markdown('<div style="color:#4CAF50; text-align:center; font-weight:bold; padding:5px; border:1px solid #4CAF50; border-radius:8px; background:#f0fff0;">✅ Correct!</div>', unsafe_allow_html=True)
         st.button("Next Word", on_click=next_question, use_container_width=True)
         
     elif s["show_reveal"]:
@@ -1700,6 +1821,8 @@ elif s["view"] == "results":
             st.caption("TOTALS")
             st.write(f"**Clean:** {c}")
             st.write(f"**Mistakes:** {w}")
+            # --- SHOW HIGH STREAK IN RESULTS ---
+            st.markdown(f"**High Streak:** {s['max_streak']}🔥")
 
     st.markdown("---")
 
@@ -1725,7 +1848,7 @@ elif s["view"] == "repair":
         s["repair_initialized"] = True
     
     # 1. Game Over Check
-    if s.get("lives", 0) <= 0:
+    if s.get("lives", 0) < 0:
         st.markdown('<div style="color:#f39c12; text-align:center; font-weight:bold; font-size:1.5rem; padding:20px;">💔 No more hearts! Returning to menu...</div>', unsafe_allow_html=True)
         time.sleep(2.0)
         s["view"] = "menu"
@@ -1794,16 +1917,25 @@ elif s["view"] == "repair":
     # 5. Stable Feedback Container (Prevents Jumping)
     st.markdown('<div class="feedback-box">', unsafe_allow_html=True)
     if s["feedback"] == "correct":
+        if s["feedback"] == "correct":
+            play_audio("correct_sound.mp3")
+            s["correct_sound_played"] = True
+            st.success("✅ Correct!")
+            time.sleep(1.0)
+
         st.markdown('<div style="color:#4CAF50; text-align:center; font-weight:bold; width:100%; padding:10px; border:2px solid #4CAF50; border-radius:8px; background:#f0fff0;">✅ Corrected!</div>', unsafe_allow_html=True)
         time.sleep(1.0)
         if s["idx"] + 1 == len(s["quiz"]):
-            s["view"] = "results"
+            st.balloons
+            s["view"] = "menu"
             s["repair_initialized"] = False
         else:
             next_question()
         st.rerun()
 
     elif s["feedback"] == "wrong":
+        play_audio("wrong_sound.mp3")
+        s["wrong_sound_played"] = True
         # Decrement lives but keep border/text BLACK
         s["lives"] -= 1
         s["feedback"] = None 
