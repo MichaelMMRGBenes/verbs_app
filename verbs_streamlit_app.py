@@ -1250,11 +1250,116 @@ def verb_conjugation_perfect(word:str):
     elif verb_type == "type 6":
         print(f"{word}, {verb_type}: {pronoun} {present_type_3_conjugation("olla", pronoun)} {(perfect_type_6_conjugation(word, pronoun))}")
 
-TENSE_COLORS = {"Present": "#2196F3", "Imperfect": "#9C27B0", "Perfect": "#009688"}
+
+TENSE_COLORS = {"Present": "#0D6A6A", "Imperfect": "#7F428A", "Perfect": "#148D80"}
 TYPE_COLORS = {
-    "type 1": "#00BCD4", "type 2": "#3F51B5", "type 3": "#FFD600", 
-    "type 4": "#E91E63", "type 5": "#607D8B", "type 6": "#000000"
+    "type 1": "#00BCD4", "type 2": "#3F51B5", "type 3": "#E0C332", 
+    "type 4": "#EF6794", "type 5": "#547C90", "type 6": "#3A2D2D"
 }
+# ==========================================
+# 1. INITIAL SETUP & CSS (Fixing Glow, Anchors, and Jumps)
+# ==========================================
+st.set_page_config(page_title="Finnish Verb Master", layout="centered")
+
+# CSS to fix the red glow, hide anchors, and stop the layout jumping
+st.markdown("""
+<style>
+    /* Remove gap between ALL elements */
+    div.element-container {
+        margin-bottom: 0.5rem !important;
+    }
+    /* 1. HIDE ALL ANCHORS & LINK ICONS */
+    .viewerBadge_link__qRIco, a.header-anchor, .stMarkdown a {
+        display: none !important;
+    }
+
+    /* 2. THE NUCLEAR OPTION: REMOVE RED/BLUE GLOW COMPLETELY */
+    div[data-baseweb="base-input"], 
+    div[data-baseweb="input"], 
+    input {
+        box-shadow: none !important;
+        outline: none !important;
+        border-color: inherit !important;
+    }
+    /* Specifically target focused and error states to kill the red shadow */
+    div[data-baseweb="base-input"]:focus-within,
+    div[data-baseweb="input"]:focus-within {
+        box-shadow: none !important;
+    }
+
+    /* 3. FIX GAPS BETWEEN INPUT AND FEEDBACK */
+    .stTextInput { margin-bottom: -15px !important; }
+    .feedback-box { 
+    margin-top: 4px !important;
+    padding: 0 !important;
+    }
+            
+    .feedback-box > div {
+    margin: 0 !important;
+    }
+    div.element-container:has(.feedback-box) {
+    margin-top: 0px !important;
+    }
+    
+    /* Ensure buttons stay close to the elements above them */
+    .stButton button { margin-top: 5px !important; }
+</style>
+""", unsafe_allow_html=True)
+st.markdown("""
+<style>
+/* 1. Kill top/bottom margin on flip card container */
+div[class*="flip-card"] {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+/* 2. Kill margin between input and the card above */
+div[data-testid="stTextInput"] {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+/* 3. Kill Streamlit container spacing around both */
+div.element-container:has(.flip-card),
+div.element-container:has(input) {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+</style>
+""", unsafe_allow_html=True)
+st.markdown("""
+<style>
+/* Remove bottom margin for the flip card button */
+div.stButton > button {
+    margin-bottom: 0px !important;
+}
+
+/* Remove extra Streamlit container spacing below the button */
+div.element-container:has(.stButton) {
+    margin-bottom: 0px !important;
+    padding-bottom: 0px !important;
+}
+</style>
+""", unsafe_allow_html=True)
+st.markdown("""
+<style>
+/* Remove Streamlit container spacing for feedback boxes */
+div.element-container:has(.feedback-box),
+div.element-container:has(div[style*='❌ Try again']) {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+/* Optional: tighten feedback box padding */
+.feedback-box > div {
+    margin: 0px !important;
+    padding: 5px 5px !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 # ==========================================
 # 2. SESSION STATE
@@ -1319,17 +1424,19 @@ def handle_submit():
     s["correct_answer"] = correct_ans
     
     if user_val == correct_ans:
-        if s["missed_current"]: s["score"]["wrong"] += 1
-        else: s["score"]["correct"] += 1
-        s["feedback"] = "correct"
-        play_audio("correct_sound.mp3")
+            # Scoring Fix: Only count correct if they didn't miss it first
+            if not s["missed_current"]:
+                s["score"]["correct"] += 1
+            s["feedback"] = "correct"
     else:
+        # Scoring Fix: Increment wrong count ONLY on the first mistake for this word
+        if not s["missed_current"]:
+            s["score"]["wrong"] += 1
+            s["missed_current"] = True
+            if (verb, tense, pronoun) not in s["to_repair"]:
+                s["to_repair"].append((verb, tense, pronoun))
         s["feedback"] = "wrong"
-        play_audio("wrong_sound.mp3") 
-        s["input_key_suffix"] += 1 
-        if (verb, tense, pronoun) not in s["to_repair"]: 
-            s["to_repair"].append((verb, tense, pronoun))
-        s["missed_current"] = True
+        s["input_key_suffix"] += 1
 
 def next_question():
     s["idx"] += 1
@@ -1352,97 +1459,212 @@ components.html("""
     }, 300);
 </script>""", height=0)
 
-# ==========================================
-# 5. VIEW LOGIC
-# ==========================================
+
+
+def start_quiz(word_source, num, mode):
+    """Initializes the quiz state with selected words and settings."""
+    # 1. Reset everything for a fresh start
+    s["idx"] = 0
+    s["score"]["correct"] = 0
+    s["score"]["wrong"] = 0
+    s["to_repair"] = []
+    s["feedback"] = None
+    s["show_reveal"] = False
+    
+    # 2. Select words
+    sample_size = min(num, len(word_source))
+    selected = random.sample(list(word_source), sample_size)
+    
+    # 3. Create the quiz list (Verb focused: Verb + Tense + Pronoun)
+    pronouns = ["minä", "sinä", "hän", "me", "te", "he"]
+    
+    s["quiz"] = []
+    for w in selected:
+        # Determine the tense for this specific question
+        q_tense = mode if mode != "Mixed" else random.choice(["Present", "Imperfect", "Perfect"])
+        # Select a random pronoun
+        q_pronoun = random.choice(pronouns)
+        s["quiz"].append((w, q_tense, q_pronoun))
+    
+    # 4. Change the view
+    s["view"] = "game"
+
+# --- 3. VIEW LOGIC ---
 if s["view"] == "menu":
     st.markdown('<h1 style="text-align:center; color:#1e3d59;">Finnish Verb Master</h1>', unsafe_allow_html=True)
     
     with st.container(border=True):
-        num = st.slider("Exercises:", 1, 50, 10)
-        mode = st.selectbox("Tense:", ["Present", "Imperfect", "Perfect", "Mixed"])
-        if st.button("Start Quiz", use_container_width=True):
-            if verbs:
-                selected_verbs = random.sample(verbs, min(num, len(verbs)))
-                pronouns = ["minä", "sinä", "hän", "me", "te", "he"]
-                s["quiz"] = [(v, (mode if mode != "Mixed" else random.choice(["Present", "Imperfect", "Perfect"])), random.choice(pronouns)) for v in selected_verbs]
-                s.update({"view": "game", "idx": 0, "score": {"correct": 0, "wrong": 0}, "to_repair": []})
-                st.rerun()
+        st.markdown("### Quiz Settings")
+        
+        # Split into Standard and Custom tabs
+        tab1, tab2 = st.tabs(["Random Verbs", "Custom Quiz"])
+        
+        # --- TAB 1: RANDOM WORDS ---
+        with tab1:
+            st.write(f"Practice using the built-in database ({len(verbs)} verbs available).")
+            num_std = st.slider("Number of exercises:", 1, 50, 10, key="slider_std")
+            mode_std = st.radio("Select Tense:", ["Present", "Imperfect", "Perfect", "Mixed"], horizontal=True, key="radio_std")
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("Start Standard Quiz", use_container_width=True, type="primary"):
+                if WORDS:
+                    start_quiz(WORDS, num_std, mode_std)
+                    st.rerun()
+                else:
+                    st.error("Database 'WORDS' not found.")
+
+        # --- TAB 2: CUSTOM LIST ---
+        with tab2:
+            st.write("Enter your own verbs or upload a vocabulary list.")
+            
+            custom_text = st.text_area(
+                "Write verbs (one per line):", 
+                placeholder="puhua\nsyödä\nmennä...", 
+                height=150, 
+                key="custom_text_input"
+            )
+            
+            uploaded_file = st.file_uploader(
+                "Or upload a .txt file", 
+                type=["txt"], 
+                key="custom_file_uploader"
+            )
+            
+            mode_cus = st.radio(
+                "Choose Tense Mode:", 
+                ["Present", "Imperfect", "Perfect", "Mixed"], 
+                horizontal=True, 
+                key="radio_cus"
+            )
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            if st.button("Start Custom Quiz", use_container_width=True, type="primary", key="btn_start_custom"):
+                word_source = []
+                
+                # Check file first, then text area
+                if uploaded_file is not None:
+                    file_bytes = uploaded_file.getvalue()
+                    content = file_bytes.decode("utf-8")
+                    word_source = [w.strip() for w in content.split("\n") if w.strip()]
+                elif custom_text.strip():
+                    word_source = [w.strip() for w in custom_text.split("\n") if w.strip()]
+                
+                if word_source:
+                    # For custom, we usually use all words provided or a specific limit
+                    num_to_use = min(len(word_source), 50) 
+                    start_quiz(word_source, num_to_use, mode_cus)
+                    st.rerun() 
+                else:
+                    st.warning("⚠️ Please upload a file or type some words first!")
+
     st.caption("Developed by Michael Beneš", text_alignment="center")
 
-elif s["view"] in ["game", "repair"]:
+elif s["view"] in ["game"]:
+
+    cols = st.columns([5, 1]) 
+    with cols[1]:
+        if st.button("Quit", use_container_width=True):
+            s["view"] = "menu"
+            st.rerun()
     verb, tense, pronoun = s["quiz"][s["idx"]]
     v_type = type_recognision(verb)
-    h_col = TENSE_COLORS.get(tense, "#2196F3")
-    c_acc = TYPE_COLORS.get(v_type, "#000000")
+    type_color = TYPE_COLORS.get(v_type.lower(), "#888")
+    tense_color = TENSE_COLORS.get(tense, "#000000")
+    
+    # 4th Picture Fix: Using Divs instead of Markdown Headers to avoid anchors
+    st.write(f"""<div style="text-align:center; color:{tense_color}; font-size:4rem; font-weight:800; margin-bottom:0px;">{tense.upper()}</div>""", unsafe_allow_html=True)
+    st.write(f"""
+    <div style="text-align:center; color:{type_color}; font-size:1.5rem; font-weight:bold; margin-bottom:20px;">
+    {v_type.upper()}
+    </div>
+    """, unsafe_allow_html=True)
 
-    if s["feedback"] == "correct": c_acc = "#4CAF50"
-    elif s["feedback"] == "wrong": c_acc = "#F44336"
+    # UI PROGRESS
+    st.progress(s["idx"] / len(s["quiz"]))
 
+    # COLOR LOGIC: 3rd Picture Fix
+    # Border & Verb color: Black initially/wrong. Green only on correct or reveal.
+    v_type = type_recognision(verb)
+    type_color = TYPE_COLORS.get(v_type.lower(), "#000000")
+
+    # Final color logic
+    if s["feedback"] == "correct" or s["show_reveal"]:
+        c_acc = "#4CAF50"  # green overrides everything
+    else:
+        c_acc = type_color  # use verb type color
+        
+
+    # CARD UI
+    is_flipped = "flipped" if (s["show_english"] or s["show_reveal"]) else ""
     st.markdown(f"""
     <style>
-    .block-container {{ padding-top: 1rem !important; max-width: 600px; margin: auto; }}
-    header {{ visibility: hidden; }}
-    [data-testid="stVerticalBlock"] {{ gap: 0rem !important; }}
-    
-    .flip-card {{ height: 220px; perspective: 1000px; margin-top: 15px; margin-bottom: 25px; }}
-    .flip-card-inner {{ position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }}
+    .flip-card {{ height: 200px; perspective: 1000px;}}
+    .flip-card-inner {{ position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.4s; transform-style: preserve-3d; }}
     .flipped {{ transform: rotateY(180deg); }}
     .face-front, .face-back {{ 
         position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
         display: flex; flex-direction: column; justify-content: center; align-items: center; 
-        border-radius: 20px; border: 5px solid {c_acc}; 
+        border-radius: 15px; border: 4px solid {c_acc}; background: white;
     }}
-    .face-front {{ background-color: {c_acc}15; }}
-    .face-back {{ transform: rotateY(180deg); background-color: #f8f9fa; }}
-    
-    div[data-baseweb="base-input"] {{ border: 2px solid {c_acc} !important; border-radius: 10px !important;}}
-    .stButton > button {{ margin-top: 5px !important; }}
-    </style>""", unsafe_allow_html=True)
-
-    # Header
-    cols = st.columns([5, 1])
-    with cols[1]:
-        if st.button("Quit"): s["view"] = "menu"; st.rerun()
-
-    st.markdown(f'<h1 style="text-align:center; color:{h_col}; margin-bottom:-10px;">{tense.upper()}</h1>', unsafe_allow_html=True)
-    st.markdown(f'<div style="text-align:center; color:{c_acc}; font-size:1.3rem; font-weight:bold; margin-bottom:10px;">VERB {v_type.upper()}</div>', unsafe_allow_html=True)
-    st.progress(s["idx"] / len(s["quiz"]))
-
-    # Card
-    is_flipped = "flipped" if (s["show_english"] or s["show_reveal"]) else ""
-    st.markdown(f"""
+    .face-back {{ transform: rotateY(180deg); background-color: #fdfdfd; }}
+    </style>
     <div class="flip-card">
         <div class="flip-card-inner {is_flipped}">
             <div class="face-front">
-                <div style="color:gray;"><b style="color:{c_acc}; font-size:2.2rem;">{pronoun}</b></div>
-                <h1 style="font-size:3.5rem; margin:0;">{verb}</h1>
+                <div style="color:{tense_color}; font-size:2rem; font-weight:bold;">{pronoun}</div>
+                <div style="font-size:3.5rem; font-weight:bold; color:{c_acc};">{verb}</div>
             </div>
             <div class="face-back">
-                <div style="color:gray;">{"CORRECT ANSWER" if s["show_reveal"] else "ENGLISH"}</div>
-                <h1 style="font-size:3rem; margin:0;">{s["correct_answer"] if s["show_reveal"] else WORDS.get(verb, "???")}</h1>
+                <div style="color:gray; font-size:0.8rem;">{"CORRECT ANSWER" if s["show_reveal"] else "ENGLISH"}</div>
+                <div style="font-size:3rem; font-weight:bold; color:{c_acc};">
+                    {s["correct_answer"] if s["show_reveal"] else "to live"}
+                </div>
             </div>
         </div>
     </div>""", unsafe_allow_html=True)
 
     st.button("Flip Card", on_click=lambda: s.update({"show_english": not s["show_english"]}), use_container_width=True)
 
-    # Input & Feedback Area
+    # 1st Picture Fix: Input Glow/Border 
+    # We use a custom key and force border color to match our logic
     if not s["show_reveal"] and s["feedback"] != "correct":
+        v_type = type_recognision(verb)
+        type_color = TYPE_COLORS.get(v_type.lower(), "#000000")
+
+        if s["feedback"] == "correct" or s["show_reveal"]:
+            c_acc = "#4CAF50"
+        elif s["feedback"] == "wrong":
+            c_acc = "#e74c3c"   # optional
+        else:
+            c_acc = type_color
+        st.markdown(f"""
+<style>
+div[data-baseweb="base-input"] {{
+    border: 2px solid {c_acc} !important;
+}}
+div[data-baseweb="base-input"]:focus-within {{
+    border: 2px solid {c_acc} !important;
+}}
+</style>
+""", unsafe_allow_html=True)
         st.text_input("Answer", key=f"in_{s['input_key_suffix']}", on_change=handle_submit, label_visibility="collapsed", placeholder="Type answer...")
 
+    # 2. FEEDBACK BOX (Jump Fix)
+    st.markdown('<div class="feedback-box">', unsafe_allow_html=True)
     if s["feedback"] == "wrong" and not s["show_reveal"]:
-        st.markdown('<div style="color:#F44336; text-align:center; font-weight:bold; padding:20px; border:1px solid #F44336; border-radius:8px; background:#fff5f5;margin-bottom:20px; margin-top:10px;">❌ Try again!</div>', unsafe_allow_html=True)
-        if st.button("Show Answer", use_container_width=True):
-            s["show_reveal"] = True
-            st.rerun()
-
+        st.markdown('<div style="color:black; text-align:center; font-weight:bold; padding:5px; border:1px solid black; border-radius:8px; background:#f9f9f9;">❌ Try again!</div>', unsafe_allow_html=True)
+        st.button("Show Answer", on_click=lambda: s.update({"show_reveal": True}), use_container_width=True)
+    
     elif s["feedback"] == "correct":
-        st.markdown('<div style="color:#4CAF50; text-align:center; font-weight:bold; padding:20px; border:1px solid #4CAF50; border-radius:8px; background:#f6fff6; margin-top:10px;">✅ Correct!</div>', unsafe_allow_html=True)
-        st.button("Next Word →", on_click=next_question, use_container_width=True)
-
+        st.markdown('<div style="color:#4CAF50; text-align:center; font-weight:bold; padding:10px; border:2px solid #4CAF50; border-radius:8px; background:#f0fff0;">✅ Correct!</div>', unsafe_allow_html=True)
+        st.button("Next Word", on_click=next_question, use_container_width=True)
+        
     elif s["show_reveal"]:
-        st.button("Next Word →", on_click=next_question, use_container_width=True)
+        st.button("Next Word", on_click=next_question, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
 
 elif s["view"] == "results":
     st.title("Quiz Results")
@@ -1497,79 +1719,95 @@ elif s["view"] == "results":
                 st.rerun()
 
 elif s["view"] == "repair":
-    # 0. Session Initialization (Ensures 3 fresh hearts at start)
+    # 0. Session Initialization
     if s.get("idx") == 0 and not s.get("repair_initialized"):
         s["lives"] = 3
         s["repair_initialized"] = True
-        s["heart_lost_this_turn"] = False
     
     # 1. Game Over Check
     if s.get("lives", 0) <= 0:
-        st.error("💔 No more hearts! Returning to menu...")
+        st.markdown('<div style="color:#f39c12; text-align:center; font-weight:bold; font-size:1.5rem; padding:20px;">💔 No more hearts! Returning to menu...</div>', unsafe_allow_html=True)
         time.sleep(2.0)
         s["view"] = "menu"
-        s["repair_initialized"] = False # Reset for next time
+        s["repair_initialized"] = False
         st.rerun()
 
-    # 2. Quit Button
-    _, col_back = st.columns([5, 1]) 
-    with col_back:
-        if st.button("Quit", help="Return to Menu", use_container_width=True):
+    # 2. Layout & Anchors Fix
+    # Using columns and custom CSS to hide anchors and fix the "Quit" button position
+    st.markdown("<style>a.header-anchor { display: none !important; } .stMarkdown h1 { margin-top: -20px; }</style>", unsafe_allow_html=True)
+    
+    cols = st.columns([5, 1]) 
+    with cols[1]:
+        if st.button("Quit", use_container_width=True):
             s["view"] = "menu"
             s["repair_initialized"] = False
             st.rerun()
 
-    # 3. Hearts Display
+    # Title with no anchors
+    st.markdown('<div style="text-align:center; color:#f39c12; font-size:4rem; font-weight:800; margin-top:-30px;">REPAIRING</div>', unsafe_allow_html=True)
+    
+    # Hearts Display
     lives_count = s.get("lives", 3)
     hearts_display = "❤️" * lives_count + "🖤" * (3 - lives_count)
-    st.markdown(f"<div style='text-align: center; font-size: 2rem; margin-top: -20px;'>{hearts_display}</div>", unsafe_allow_html=True)
-
-    # 4. Header & Progress
-    word, case = s["quiz"][s["idx"]]
-    st.markdown(f"""
-        <div style="text-align: center; margin-top: -10px; margin-bottom: -15px;">
-            <h1 style="color: #f39c12; font-size: 3.5rem; font-weight: 800; letter-spacing: 2px;">REPAIRING</h1>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align: center; font-size: 2rem; margin-bottom: 5px;'>{hearts_display}</div>", unsafe_allow_html=True)
     
     st.progress((s["idx"]) / len(s["quiz"]))
-    st.markdown(f"<p class='centered-text' style='color: gray; margin-top: -12px; margin-bottom: 5px; font-size: 0.8rem;'>Mistake {s['idx']+1} / {len(s['quiz'])}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:center; color:gray; font-size:0.8rem; margin-top:-10px;'>Mistake {s['idx']+1} / {len(s['quiz'])}</p>", unsafe_allow_html=True)
 
-    # 5. Target Word Card
-    with st.container(border=True):
-        st.markdown(f"<div class='centered-text' style='margin-bottom: 10px;'><small style='color:gray;'>Form {case}</small><h1 style='color:#2c3e50; font-size: 5rem; margin: 0;'>{word}</h1></div>", unsafe_allow_html=True)
-        
-        input_key = f"in_{s['input_key_suffix']}"
-        st.text_input("Answer", key=input_key, on_change=handle_submit, label_visibility="collapsed", placeholder="Type the correct form...")
+    # 3. Dynamic Color Logic (Black for neutral/wrong, Green for correct)
+    c_acc = "#4CAF50" if s["feedback"] == "correct" else "#f39c12"
+    
+    # Target Word Card (Fixes the Big Gap and the Border Glow)
+    verb, tense, pronoun = s["quiz"][s["idx"]]
+    
+    st.markdown(f"""
+        <style>
+            /* Kill the red glow effectively */
+            div[data-baseweb="base-input"] {{ 
+                border: 2px solid {c_acc} !important; 
+                box-shadow: none !important; 
+            }}
+            div[data-baseweb="base-input"]:focus-within {{
+                border: 2px solid {c_acc} !important;
+                box-shadow: none !important;
+            }}
+            .repair-card {{
+                text-align: center;
+                padding: 30px;
+                border: 4px solid {c_acc};
+                border-radius: 20px;
+                background: white;
+                margin-bottom: 15px; /* Fixed gap */
+            }}
+            .feedback-box {{ min-height: 80px; display: flex; align-items: center; justify-content: center; }}
+        </style>
+        <div class="repair-card">
+            <div style="color:gray; font-size:1.8rem;">{tense} • {pronoun}</div>
+            <div style="font-size:4rem; font-weight:bold; color:{c_acc};">{verb}</div>
+        </div>
+    """, unsafe_allow_html=True)
 
-        correct_sound = "correct_sound.mp3"
-        wrong_sound = "wrong_sound.mp3"
-           # 6. Feedback Logic (Lose a heart on EVERY wrong submission)
-        if s["feedback"] == "correct":
-            play_audio("correct_sound.mp3")
-            st.success("✅ Correct!")
-            time.sleep(1.0)
-            
-            if s["idx"] + 1 == len(s["quiz"]):
-                s["repair_initialized"] = False
-                
+    # 4. Input Area (Key suffix ensures it clears on 'wrong')
+    if s["feedback"] != "correct":
+        st.text_input("Answer", key=f"in_{s['input_key_suffix']}", on_change=handle_submit, label_visibility="collapsed", placeholder="Fix the mistake...")
+
+    # 5. Stable Feedback Container (Prevents Jumping)
+    st.markdown('<div class="feedback-box">', unsafe_allow_html=True)
+    if s["feedback"] == "correct":
+        st.markdown('<div style="color:#4CAF50; text-align:center; font-weight:bold; width:100%; padding:10px; border:2px solid #4CAF50; border-radius:8px; background:#f0fff0;">✅ Corrected!</div>', unsafe_allow_html=True)
+        time.sleep(1.0)
+        if s["idx"] + 1 == len(s["quiz"]):
+            s["view"] = "results"
+            s["repair_initialized"] = False
+        else:
             next_question()
-            st.rerun()
+        st.rerun()
 
-        elif s["feedback"] == "wrong":
-            # 1. Okamžité přehrání zvuku
-            play_audio("wrong_sound.mp3")
-            
-            # 2. Zobrazení chyby (aby uživatel viděl, co se děje během sleepu)
-            st.error(f"❌ Wrong! Hearts: {s['lives'] - 1}/3") 
-            
-            # 3. Aktualizace stavu
-            s["lives"] -= 1
-            s["last_processed_submit"] = s["input_key_suffix"]
-            s["feedback"] = None
-            
-            time.sleep(1.0)
-            st.rerun()
-
-            if s["lives"] <= 0:
-                st.rerun() 
+    elif s["feedback"] == "wrong":
+        # Decrement lives but keep border/text BLACK
+        s["lives"] -= 1
+        s["feedback"] = None 
+        st.markdown('<div style="color:black; text-align:center; font-weight:bold; width:100%; padding:10px; border:1px solid black; border-radius:8px; background:#f9f9f9;">❌ Try again! (Life lost)</div>', unsafe_allow_html=True)
+        time.sleep(0.8)
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
